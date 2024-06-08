@@ -1,0 +1,4445 @@
+<?php
+if (1==1) {
+session_start();
+require_once('conf.php');
+$arrayca = array();
+$arrayca = getallheaders();
+$alias=$arrayca['SM_USER'];
+
+
+if (isset($_GET['q']) and "salir"==$_GET['q']){
+//$arrayca['SM_USER']="";
+session_destroy();  
+//echo '<meta http-equiv="refresh" content="0;URL=." />';
+echo '<meta http-equiv="refresh" content="0;URL=https://accesos.supernotariado.gov.co/iam/im/logout.jsp?envAlias=snr" />';
+} else { }
+
+
+if (isset($arrayca['SM_USER']) && ""!=$arrayca['SM_USER']){
+
+if (!isset($_SESSION['snr'])) { 
+$idca=trim($arrayca['SM_USER']);
+
+$consulta = mysql_query("SELECT * FROM funcionario WHERE alias_iduca='$idca' and estado_funcionario=1 limit 1", $conexion);
+$row1 = mysql_fetch_assoc($consulta);
+$nn = mysql_num_rows($consulta);
+if (0<$nn) {
+$_SESSION['snr']=$row1['id_funcionario'];
+$_SESSION['rol']=$row1['id_rol'];
+$_SESSION['snr_nombre']=$row1['nombre_funcionario'];
+$_SESSION['snr_correo']=$row1['correo_funcionario'];
+$_SESSION['snr_grupo_area']=$row1['id_grupo_area'];
+$_SESSION['snr_grupo_cargo']=$row1['id_cargo'];
+$_SESSION['snr_lider_pqrs']=$row1['lider_pqrs'];
+$_SESSION['snr_perfil_funcionario']=$row1['perfil_funcionario'];
+$_SESSION['snr_tipo_oficina']=$row1['id_tipo_oficina'];
+$_SESSION['aprueba_pqrs']=$row1['aprueba_pqrs'];
+$_SESSION['lider_percepcion']=$row1['lider_percepcion'];
+$_SESSION['foto_funcionario']=$row1['foto_funcionario'];
+$_SESSION['cedula_funcionario']=$row1['cedula_funcionario'];
+$_SESSION['supervisor']=$row1['supervisor'];
+$_SESSION['guardar_pdf']=$row1['guardar_pdf'];
+$_SESSION['alias']=$row1['alias_iduca'];
+$_SESSION['vinculacion']=$row1['id_vinculacion'];
+
+if (isset($row1['username_iris']) && ""!=$row1['username_iris']) {
+	$_SESSION['username_iris']=$row1['username_iris'];
+} else {
+	$_SESSION['username_iris']='0';
+}
+
+if (1==$row1['id_tipo_oficina']){
+$id_grupo=$row1['id_grupo_area'];
+$actualizar6 = mysql_query("SELECT id_area FROM grupo_area WHERE id_grupo_area='$id_grupo' limit 1", $conexion);
+$row16 = mysql_fetch_assoc($actualizar6);
+$_SESSION['snr_area']=$row16['id_area'];
+mysql_free_result($actualizar6);
+$_SESSION['id_departamento']=11;
+$_SESSION['id_municipio']=149;
+} else if (2==$row1['id_tipo_oficina']){
+$_SESSION['id_oficina_registro']=$row1['id_oficina_registro'];
+
+
+$query_updatefx = "SELECT id_departamento, id_municipio from oficina_registro where id_oficina_registro=".$row1['id_oficina_registro']." and estado_oficina_registro=1";
+$updatefx = mysql_query($query_updatefx, $conexion);
+$rowfx = mysql_fetch_assoc($updatefx);
+$_SESSION['id_departamento']=$rowfx['id_departamento'];
+$_SESSION['id_municipio']=$rowfx['id_municipio'];
+mysql_free_result($updatefx);
+
+
+} else if (3==$row1['id_tipo_oficina']){
+	
+	if (1==$row1['id_cargo']){
+$idfuncc=$row1['id_funcionario'];
+$actualizar67 = mysql_query("SELECT id_notaria FROM posesion_notaria WHERE id_funcionario=".$idfuncc." and fecha_fin is null and estado_posesion_notaria=1 limit 1", $conexion);
+$row167 = mysql_fetch_assoc($actualizar67);
+$_SESSION['id_vigilado']=$row167['id_notaria'];
+$_SESSION['posesionnotaria']=$row167['id_notaria'];
+mysql_free_result($actualizar67);
+	} else {
+$_SESSION['id_vigilado']=$row1['id_notaria_f'];		
+	}
+
+} else {}
+
+mysql_free_result($consulta);
+
+?>
+<script src='ip.js'></script>
+<?php
+//setcookie("iplocal","iplocal");
+
+if (isset($_COOKIE['iplocal'])) {
+	$ip_snr=$_COOKIE['iplocal'];
+	//echo $ip_snr;
+} else {
+	$ip_snr='0';
+}
+
+
+
+
+$insertSQL887 = sprintf("INSERT INTO auditoria (id_funcionario, alias, ip, fecha_hora, url, descripcion_auditoria, ip_local) VALUES (%s, %s, %s, now(), %s, %s, %s)",
+                       GetSQLValueString($_SESSION['snr'], "int"),
+                       GetSQLValueString($alias, "text"),
+					    GetSQLValueString($iplocal, "text"),
+                       GetSQLValueString('inicio', "text"),
+                       GetSQLValueString('inicio', "text"),
+					  GetSQLValueString($ip_snr, "text"));
+$Result1887 = mysql_query($insertSQL887, $conexion) or die(mysql_error());
+
+mysql_free_result($Result1887);
+
+} else {
+echo '<div style="background:#b21f24;color:#fff;"><center>COMUNICARSE AL CORREO: ana.diaz@supernotariado.gov.co PARA CREAR SU USUARIO Y ASIGNAR SUS PERMISOS.</center></div>';
+//echo '<div style="background:#b21f24;color:#fff;"><center>En este momento las aplicaciones de la SNR se encuentran en Mantenimiento.</center></div>';
+
+}
+
+
+
+
+} else { }
+
+
+} else { 
+echo '<meta http-equiv="refresh" content="0;URL=https://accesos.supernotariado.gov.co/iam/im/logout.jsp?envAlias=snr" />';
+}
+
+
+
+ if (isset($_SESSION['snr'])) { 
+ 
+require_once('pages/listas.php'); 
+   
+
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Sistema Integrado de Servicios y Gestión</title>
+  <!--<meta http-equiv="X-Frame-Options" content="deny">-->
+  <meta name="author" content="http://es.linkedin.com/in/giovanniortegon">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <script src="plugins/jQuery/jquery.min.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  
+
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="media/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="media/font-awesome/css/font-awesome.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  
+  <link href='images/favicon.ico' rel='icon' type='image/x-icon'/>
+  
+
+  <link rel="stylesheet" href="dist/css/stylenot.css">
+  <script type="text/javascript" src="dist/js/pages/sweetalert.min.js"></script>
+    
+	
+	  <!-- JONATHAN SACAR BUTTON COPY EXCEL CSV PDF EN TABLE --> 
+  <link rel="stylesheet" type="text/css" href="dist/xls_jo/buttons.dataTables.min.css">
+  <script type="text/javascript" language="javascript" src="dist/xls_jo/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" language="javascript" src="dist/xls_jo/dataTables.buttons.min.js"></script>
+  <script type="text/javascript" language="javascript" src="dist/xls_jo/jszip.min.js"></script>
+  <script type="text/javascript" language="javascript" src="dist/xls_jo/pdfmake.min.js"></script>
+  <script type="text/javascript" language="javascript" src="dist/xls_jo/vfs_fonts.js"></script>
+  <script type="text/javascript" language="javascript" src="dist/xls_jo/buttons.html5.min.js"></script>
+  <!-- JONATHAN FIN SACAR BUTTON COPY EXCEL CSV PDF EN TABLE --> 
+
+  
+  
+
+	
+  <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+  <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="plugins/iCheck/flat/blue.css">
+  <!-- bootstrap wysihtml5 - text editor -->
+  <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+
+	
+
+  <!-- Theme style  https://adminlte.io/docs/2.4/license     -->
+<link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+<!-- AdminLTE Skins. We have chosen the skin-blue for this starter
+page. However, you can choose any other skin. Make sure you
+apply the skin class to the body tag so the changes take effect.
+-->
+<link rel="stylesheet" href="dist/css/skins/skin-blue.min.css">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+   <!--Javascript-->    
+   
+   <script>
+     var arraydays = ["1920-01-01"];
+   </script>
+
+ <style>
+ .blanco {
+	 color:#fff;
+ }
+  .verde {
+	 color:#00A65A;
+ }
+ 
+  .rojo {
+	 color:#DD4B39;
+ }
+ 
+   .azul {
+	 color:#0369b7;
+ }
+ 
+ .texto {
+	 color:#666;
+	 font-size:16px;
+	 text-align : justify;
+ }
+ .gris {
+	 background:#555;
+ }
+ 
+ .iconos {
+	 color:#fff;
+ }
+
+ .iconos:hover {
+	 background:#5F5A62;
+	 cursor: pointer;
+ }
+ 
+ .mintamano{
+	 min-width:180px;
+ }
+ .campominimo{
+	  min-width:300px;
+ }
+ 
+  .opciones{
+	width:200px;
+ }
+ 
+ tr:hover {
+	 background:#f2f2f2;
+ }
+ .mouse {
+	cursor:pointer;
+ }
+ 
+ textarea{
+	 min-height:70px;
+ }
+ 
+ 
+ 
+ .datepicker {
+background: transparent url(images/calendar.png) no-repeat center right;
+background-color: #fff;
+text-align:left; 
+cursor:pointer;
+padding-left: 5px;
+width:200px;
+}
+
+.datepickera{
+background: transparent url(images/calendar.png) no-repeat center right;
+background-color: #fff;
+text-align:left; 
+cursor:pointer;
+padding-left: 5px;
+width:200px;
+}
+
+
+.convgris img {
+opacity: .3; 
+}
+
+
+
+
+
+ .caja {
+	 width:100%;
+	 height:30px;
+	 border-radius: 0 15px 15px 0;
+	 margin: -12px 0 14px 0;
+	 color:#fff;
+	 text-align: center;
+	 padding:4px;
+     border: 1px solid #777;
+
+  
+ }
+ 
+ .cajavacia{
+	  background:#bbb;
+ }
+ 
+  .cajallena{
+	  background:#B40404;
+	  cursor: pointer;
+
+ }
+
+ 
+  .mensajeaclaracion {
+	  color:#B40404;
+ }
+
+ .triangulo {
+
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-left: 30px solid #f1f1f1;
+  margin: -25px 0 0 -5px;
+  position:relative;
+ 
+}
+
+.text_titulos{
+    font-size: 13px;
+    text-transform: capitalize;
+    font-weight: normal;  
+}
+.numer{
+    font-size: 12px;
+    text-transform: capitalize;
+}
+.muestra{
+    font-size: 15px;
+    text-transform: capitalize;
+    border:1px solid #d2d6de;
+    width: 100%;
+    
+}
+.totales{
+    font-size: 90%;
+    text-transform: capitalize;
+    width: 100%;
+    color:#fff;
+    background: #555;
+    margin: 10px 0px 0px 0px;
+}
+.numeros_totales{
+    margin: -8px 0px 0px 0px;
+    font-size: 100%;
+    width: 100%;
+    color:#fff;
+    background: #555;
+}
+.numero_total{
+    text-align: center;
+    width: 100%;
+}
+.totalescon{
+    font-size: 120%;
+    text-transform: capitalize;
+    width: 100%;
+    margin: 10px 0px 0px 0px;
+}
+
+
+.letrablanca {
+	color:#fff;
+}
+
+ul.wysihtml5-toolbar li a[title="Insert image"] { display: none; }
+ul.wysihtml5-toolbar li.dropdown { display: none; }
+ul.wysihtml5-toolbar li a[title="Insert link"] { display: none; }
+
+
+
+.linkf {
+	cursor: pointer;
+}
+
+
+
+
+
+
+.salert {
+	-webkit-animation: color_change 0.5s infinite alternate;
+	-moz-animation: color_change 0.5s infinite alternate;
+	-ms-animation: color_change 0.5s infinite alternate;
+	-o-animation: color_change 0.5s infinite alternate;
+	animation: color_change 0.5s infinite alternate;
+width:100%;
+height:5px;	
+}
+@-webkit-keyframes color_change {
+	from { background-color: #B40404; }
+	to { background-color: #fff; }
+}
+@-moz-keyframes color_change {
+	from { background-color: #B40404; }
+	to { background-color: #fff; }
+}
+@-ms-keyframes color_change {
+	from { background-color: #B40404; }
+	to { background-color: #fff; }
+}
+@-o-keyframes color_change {
+	from { background-color: #B40404; }
+	to { background-color: #fff; }
+}
+@keyframes color_change {
+	from { background-color: #B40404; }
+	to { background-color: #fff; }
+}
+
+
+
+
+ </style> 
+ 
+ 
+    
+    
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini"> <!--onload="copiar();"-->
+
+<?php // if (1226==$_SESSION['snr']) { echo '<div id="causuarios">'.print_r($arrayca).'</div>';} else {}?>
+
+          <div class="wrapper">
+
+            <!-- Main Header -->
+            <header class="main-header">
+
+              <!-- Logo -->
+              <a href="./" class="logo">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                <span class="logo-mini"><b>SNR</b></span>
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg"><b>SNR</b></span>
+              </a>
+
+              <!-- Header Navbar -->
+              <nav class="navbar navbar-static-top" role="navigation">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                  <span class="sr-only">Menu</span>
+                </a>
+                <!-- Navbar Right Menu -->
+                <div class="navbar-custom-menu">
+
+
+
+
+                           <ul class="nav navbar-nav">
+                
+				
+				
+				
+				
+				
+				       <li class="dropdown tasks-menu">
+                     
+                      <a href="https://office.com" target="_blank" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-envelope" title="Correo"></i>
+                        <span class="label label-danger"></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                       <!-- <li class="header">@supernotariado.gov.co</li>-->
+                 
+                        <li class="footer">
+                          <a href="https://office.com" target="_blank" class="">Acceder a correo</a>
+                        </li>
+                      </ul>
+                    </li>
+					
+				
+				
+
+                    <li class="dropdown messages-menu">
+                      <!-- Menu toggle button -->
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-envelope-o"></i>
+                        <span class="label label-success">
+<?php 
+$navegador= $_SERVER['HTTP_USER_AGENT'];
+if (strpos($navegador, 'Chrome') !== false) {
+   $varnavegador=0;
+   $mensajenavegador='Tienes 0 mensajes';
+   echo $varnavegador;
+} else { 
+   $varnavegador=1;
+   $mensajenavegador='Se recomienda usar el <br>navegador Google Chrome.';
+   echo $varnavegador;
+ }
+ ?></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li class="header">Tienes <?php echo $varnavegador; ?> mensajes</li>
+                        <li>
+                          <!-- inner menu: contains the messages -->
+                          <ul class="menu">
+                            <li><!-- start message -->
+                              <a href="#">
+                                <div class="pull-left">
+                                  <!-- User Image -->
+                                  <img src="dist/img/email.png" class="img-circle" alt="User Image">
+                                </div>
+                                <!-- Message title and timestamp -->
+                                <h4>
+                                 <?php echo $mensajenavegador; ?>
+                                </h4>
+                                <!-- The message -->
+                                <p></p>
+                              </a>
+                            </li>
+                            <!-- end message -->
+                          </ul>
+                          <!-- /.menu -->
+                        </li>
+                        <li class="footer"><a href="" class="">Mensajes automáticos</a></li>
+                      </ul>
+                    </li>
+                    <!-- /.messages-menu -->
+
+                    <!-- Notifications Menu -->
+                    <li class="dropdown notifications-menu">
+                      <!-- Menu toggle button -->
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-bell-o"></i>
+<?php
+
+if (1==$_SESSION['rol'] or (1==$_SESSION['snr_grupo_cargo'] && 3==$_SESSION['snr_tipo_oficina'])) {
+	 
+$fechamenosdiez=date('Y-m-d', strtotime('-14 day', strtotime($realdate)));
+$querypre = "SELECT count(id_derecho_preferencia) AS cantipre FROM derecho_preferencia WHERE fecha_publicacion>='$fechamenosdiez' and estado_derecho_preferencia=1"; 
+$selectpre = mysql_query($querypre, $conexion);
+$rowpre = mysql_fetch_assoc($selectpre);
+$cantipre=$rowpre['cantipre'];
+mysql_free_result($selectpre);
+} else { $cantipre=0; }
+/*$fechaf=fechahabil($fecha, 10);
+if ($fechaf>=$realdate) {
+	array
+} else {
+	
+}*/
+
+ IF (0<$cantipre) {
+	 echo '<span class="label label-warning">'.$cantipre.'</span>';
+ } else { echo '<span class="label label-warning" id="cuentanotificar"></span>'; }
+?>
+                        
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li class="header"> <?PHP IF (0<$cantipre) {
+							echo '';
+						} else { echo '<span id="cuentanotificarv2"></span>'; }
+						?>
+							 Notificaciones</li>
+                        <li>
+                          <!-- Inner Menu: contains the notifications -->
+                          <ul class="menu">
+						  <?PHP IF (0<$cantipre) {
+                          
+ECHO '					  <li>
+                              <a href="https://www.supernotariado.gov.co/delegada-de-notariado/derechos-preferencia/" class="comprar" target="_blank">
+                                <i class="fa fa-file-pdf-o"></i>Nuevo derecho de preferencia</a>
+                            </li>';
+						  } else {}
+?>
+                         
+						   
+						   <?php
+						
+if (3>$_SESSION['snr_tipo_oficina']) {
+$arrayven = array();
+
+						
+					   
+$query = "SELECT solicitud_pqrs.id_solicitud_pqrs, radicado, fecha_radicado, terminos_dias, terminos_ampliados, fecha_inicio_ampliacion, dias_ampliacion
+ FROM solicitud_pqrs, asignacion_pqrs_funcionario, clasificacion_pqrs, clase_oac 
+WHERE  solicitud_pqrs.id_solicitud_pqrs=asignacion_pqrs_funcionario.id_solicitud_pqrs 
+and clasificacion_pqrs.id_solicitud_pqrs=solicitud_pqrs.id_solicitud_pqrs
+AND clasificacion_pqrs.id_clase_oac=clase_oac.id_clase_oac
+and estado_asignacion_pqrs_funcionario=1 and asignacion_pqrs_funcionario.id_funcionario=".$_SESSION['snr']."
+AND (solicitud_pqrs.id_estado_solicitud!=5 and solicitud_pqrs.id_estado_solicitud!=6 and 
+solicitud_pqrs.id_estado_solicitud!=7)
+ and estado_solicitud_pqrs=1 AND estado_asignacion_pqrs_funcionario=1  
+ AND estado_clasificacion_pqrs=1   AND estado_clase_oac=1
+ order by solicitud_pqrs.id_solicitud_pqrs asc "; 
+
+
+$selectnoti = mysql_query($query, $conexion);
+$rownoti = mysql_fetch_assoc($selectnoti);
+$totalRows = mysql_num_rows($selectnoti);
+if (0<$totalRows){
+
+$realdate= date("Y-m-d");
+
+$menosundia = date('Y-m-d', strtotime('+1 day', strtotime($realdate)));
+	
+$menosdosdia = date('Y-m-d', strtotime('+2 day', strtotime($realdate)));
+$array1nn = array();
+
+
+
+
+do {
+	if (isset($rownoti['dias_ampliacion']) && isset($rownoti['fecha_inicio_ampliacion'])) {
+$fechavence=fechahabil($rownoti['fecha_inicio_ampliacion'],$rownoti['dias_ampliacion']);	
+	} else {
+		
+		
+$fecha_rad = strtotime($rownoti['fecha_radicado']);
+$fecha_entrada = strtotime('2022-05-18');
+
+if($fecha_rad >= $fecha_entrada) {
+$fechavence=fechahabil($rownoti['fecha_radicado'],$rownoti['terminos_dias']);
+} else {
+$fechavence=fechahabil($rownoti['fecha_radicado'],$rownoti['terminos_ampliados']);
+}
+
+		
+
+	}
+
+if ($realdate>$fechavence) {
+	array_push($arrayven, 1);
+		
+} else {
+	
+	
+if ($realdate==$fechavence) {
+echo '<li>';
+echo '<a href="https://sisg.supernotariado.gov.co/solicitud_pqrs&'.$rownoti['id_solicitud_pqrs'].'.jsp"><i class="fa fa-warning text-yellow"></i> Hoy vence PQRS '.$rownoti['radicado'].'</a>';
+echo '</li>';
+	array_push($array1nn, 1);
+} else {
+	
+
+if ($menosundia==$fechavence) {
+echo '<li>';
+echo '<a href="https://sisg.supernotariado.gov.co/solicitud_pqrs&'.$rownoti['id_solicitud_pqrs'].'.jsp"><i class="fa fa-warning text-yellow"></i> Mañana vence PQRS '.$rownoti['radicado'].'</a>';
+echo '</li>';
+array_push($array1nn, 1);
+	} 
+	
+else {
+	
+	if ($menosdosdia==$fechavence) {
+echo '<li>';
+echo '<a href="https://sisg.supernotariado.gov.co/solicitud_pqrs&'.$rownoti['id_solicitud_pqrs'].'.jsp"><i class="fa fa-warning text-yellow"></i> En dos dias vence PQRS '.$rownoti['radicado'].'</a>';
+echo '</li>';
+array_push($array1nn, 1);
+
+
+	} else {
+	
+echo '';	
+}
+
+		
+}
+
+		
+}
+
+	
+}
+	
+	
+	
+  } while ($rownoti = mysql_fetch_assoc($selectnoti)); 
+  
+  
+  
+$tramitenotificacion=array_sum($array1nn);
+$vencidas=array_sum($arrayven); 
+
+} else {
+	
+ $tramitenotificacion='0';
+}	 
+mysql_free_result($selectnoti);
+
+
+?>
+
+
+<script>
+var tramitenotificacion=<?php echo $tramitenotificacion; ?>;
+document.getElementById("cuentanotificar").innerHTML=tramitenotificacion;
+document.getElementById("cuentanotificarv2").innerHTML=tramitenotificacion;
+</script>
+
+<?php } else {} ?>		   
+						   
+						   
+                          </ul>
+                        </li>
+                        <li class="footer"><a href="#">Notificaciones automáticas</a></li>
+                      </ul>
+                    </li>
+                    <!-- Tasks Menu -->
+                    <li class="dropdown tasks-menu">
+                      <!-- Menu Toggle Button -->
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-flag-o"></i>
+                        <span class="label label-danger"><?php if (0<$vencidas) {echo $vencidas;} else {	echo '0';} ?></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li class="header">Tramites</li>
+                        <li>
+                          <!-- Inner menu: contains the tasks -->
+                          <ul class="menu">
+						  		   
+								<?php 
+
+if (0<$vencidas) {
+	echo '<li><a href="xls/pqrs_pendientes&0&'.$_SESSION['snr'].'.xls"><i class="fa fa-warning text-yellow"></i>Total de PQRS vencidas: '.$vencidas.'</a></li>';
+} else {
+   echo '<li><a>0</a></li>';
+}	
+								?>
+                               
+
+                          </ul>
+                        </li>
+                        <li class="footer">
+                          <a href="xls/pqrs_pendientes&0&<?php echo $_SESSION['snr']; ?>.xls" class="">Reporte</a>
+                        </li>
+                      </ul>
+                    </li>
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					 <!-- SOPORTE TICKET -->
+					
+					       <li class="dropdown tasks-menu">
+                     
+                      <a href="http://mesadeservicio.supernotariado.gov.co:8080/CAisd/pdmweb.exe" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-question-circle" title="Ticket de soporte"></i>
+                        <span class="label label-danger">0</span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li class="header">Ticket de soporte</li>
+                 
+                        <li class="footer">
+                          <a href="http://mesadeservicio.supernotariado.gov.co:8080/CAisd/pdmweb.exe" class="">Acceder</a>
+                        </li>
+                      </ul>
+                    </li>
+					
+					
+					
+					
+					
+					
+					
+					
+					
+                    <!-- User Account Menu -->
+                    <li class="dropdown user user-menu">
+                      <!-- Menu Toggle Button -->
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <!-- The user image in the navbar-->
+                        <img src="files/avatar.png" class="user-image" alt="User Image">
+                        <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                        <span class="hidden-xs"><?php echo $_SESSION['snr_nombre']; ?> </span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <!-- The user image in the menu -->
+                        <li class="user-header">
+                          <img src="files/<?php echo $_SESSION['foto_funcionario']; ?>" class="img-circle" alt="User Image">
+
+                          <p>
+                           <?php 
+						   
+						   
+
+
+						   if (1==$_SESSION['snr_tipo_oficina']) { 
+						  						   
+						      $snr_grupo_area= quees('grupo_area', $_SESSION['snr_grupo_area']); 
+							  echo $snr_grupo_area;
+							echo '<small>'. $_SESSION['snr_perfil_funcionario'].'</small>';
+						   } else {
+						   echo quees('tipo_oficina', $_SESSION['snr_tipo_oficina']);
+						   	echo '<small>';
+							  echo quees('cargo', $_SESSION['snr_grupo_cargo']); 
+							echo '</small>';
+						   }
+ 
+						   ?>
+                            
+                          </p>
+                        </li>
+                        <!-- Menu Body -->
+
+                        <!-- Menu Footer-->
+                        <li class="user-footer">
+                          <div class="pull-left">
+                            <a href="usuario.jsp" class="btn btn-default btn-flat comprar">Mi perfil</a>
+                          </div>
+                          <div class="pull-right">
+                            <a href="salir.jsp" class="btn btn-default btn-flat">Salir</a>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                    <!-- Control Sidebar Toggle Button -->
+                    <li>
+                      <a href="#" data-toggle="control-sidebar"><i class="fa fa-phone"></i></a>
+                    </li>
+                  </ul>
+
+
+
+                </div>
+              </nav>
+            </header>
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="main-sidebar">
+
+              <!-- sidebar: style can be found in sidebar.less -->
+              <section class="sidebar">
+              <!-- Sidebar user panel -->
+
+              <!-- search form -->
+              <form action="ciudadanos.jsp" method="post" class="sidebar-form">
+                <div class="input-group">
+				<input type="hidden" name="campo" value="nombre_ciudadano">
+
+                  <input type="text" name="buscar" class="form-control" placeholder="Buscar...">
+                      <span class="input-group-btn">
+                        <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                        </button>
+                      </span>
+                </div>
+              </form>
+                <!-- /.search form -->
+
+                <!-- Sidebar Menu -->
+                <ul class="sidebar-menu" data-widget="tree">
+                  <li class="header">Menu</li>
+                  <!-- Optionally, you can add icons to the links -->
+<li class="active"><a href="./"><i class="fa fa-laptop"></i> <span>Inicio</span></a></li>
+
+<?php	
+
+if (2==$_SESSION['vinculacion'] or 1==$_SESSION['rol']) { 	
+//echo '<li><a href="votacion_personal.jsp"><i class="fa fa-users"></i> <span>Votación Comisión Personal</span></a></li>';
+ } else {} 
+ 
+ /*
+ if (1==$_SESSION['vinculacion'] or 2==$_SESSION['vinculacion'] or 3==$_SESSION['vinculacion'] or 4==$_SESSION['vinculacion'] or 7==$_SESSION['vinculacion'] or 1==$_SESSION['rol']) { 	
+echo '<li><a href="votacion_convivencia.jsp"><i class="fa fa-users"></i> <span>Votación Comité Convivencia</span></a></li>';
+} else {}
+ */
+ 
+ ?>
+ 
+
+
+
+<li><a href="directorio.jsp"><i class="fa fa-users"></i> <span>Directorio</span></a></li>
+
+<?php	
+//$votann=votacion($_SESSION['snr']);
+//$votannfc=votacionfc($_SESSION['snr']);
+if (0<$votannfc or 1==$_SESSION['rol']) { 			  
+// echo '<li><a href="inscripcion_votacion_fondo_cuenta.jsp"><i class="fa fa-user"></i> <span>Ins. Candidatos FCEN</span></a></li>';
+ // echo '<li><a href="votacion_fc.jsp"><i class="fa fa-user"></i> <span>Votación FC</span></a></li>';
+ } else {} 
+ ?>	
+
+
+
+
+
+
+<?php
+
+
+if (1==$_SESSION['rol'] or 0<$nump75 or 3==$_SESSION['snr_tipo_oficina']) { 		
+//echo '<li><a href="foro_fe.jsp"><i class="fa  fa-cubes"></i> <span>FORO: Facturación electrónica</span></a></li>';
+ } else {} ?>	
+
+<?php 
+$nump69=privilegios(69,$_SESSION['snr']);
+if (1==$_SESSION['rol'] or 0<$nump69) { ?>	
+<li><a href="reporte_fac_notaria.jsp"><i class="fa  fa-cubes"></i> <span>Facturación electrónica</span></a></li>
+
+<?php  } else {}
+
+$nump97=privilegios(97,$_SESSION['snr']);
+ if (1==$_SESSION['rol'] or 0<$nump97) { ?>	
+<li><a href="validacion_notarias_digitales.jsp"><i class="fa  fa-cubes"></i> <span>Digitalización Notarial</span></a></li>
+<?php } else {} ?>	
+ 
+
+ 
+	
+	
+
+
+
+<?php if ((1==$_SESSION['supervisor'] or 5==$_SESSION['snr_grupo_cargo']) or 1==$_SESSION['rol']) { ?>
+<li><a href="nc_vista_contrato.jsp"><i class="fa fa-user"></i> <span>Contratista</span></a></li>
+ <?php } else { } ?>
+
+
+
+
+ 
+
+<li><a href="pqrs.jsp"><i class="fa fa-outdent"></i> <span>PQRS</span></a></li>
+				  
+				   <?php if (2>=$_SESSION['snr_tipo_oficina']) { ?>
+<li><a href="pqrs_anteriores.jsp"><i class="fa fa-list-alt"></i> <span>PQRS anteriores</span></a></li>
+				   <?php } else { } ?>
+				   
+<?php 
+	$nump91=privilegios(91,$_SESSION['snr']);
+
+if (0<$nump91 or 2==$_SESSION['snr_tipo_oficina'] or 40==$_SESSION['snr_grupo_area'] or 24==$_SESSION['snr_grupo_area'] or 1==$_SESSION['rol']) { ?>
+<li><a href="ciudadanos.jsp"><i class="fa fa-child"></i> <span>Ciudadanos</span></a></li>
+	<?php } else {} ?>	
+						   
+						   
+<?php 
+$nump37=privilegios(37,$_SESSION['snr']);
+
+if (24==$_SESSION['snr_grupo_area'] or 1==$_SESSION['rol'] or 0<$nump37) { ?>
+<li><a href="chat.jsp"><i class="fa fa-commenting-o"></i> <span>Chat</span></a></li>
+<?php } else {} ?>	
+						   
+						   
+<?php 
+
+$nump83=privilegios(83,$_SESSION['snr']);
+
+if ( 1==$_SESSION['rol'] or 0<$nump83)  { ?>
+<!--<li><a href="ausentismo.jsp"><i class="fa fa-legal"></i> <span>Ausentismo</span></a></li>-->
+<?php } else {} ?>
+		
+
+ <?php if (1==$_SESSION['rol'] or 0<$nump83)  { ?>
+<li><a href="permiso_funcionario.jsp"><i class="fa fa-cube"></i> <span>Permisos</span></a></li>
+				  <?php } else {} ?>	
+						   		
+				  
+						   
+<li><a href="orips.jsp"><i class="fa fa-building"></i> <span>ORIP</span></a></li>
+
+
+
+ <?php if (3>$_SESSION['snr_tipo_oficina'])  { ?>
+<li class="treeview">
+                    <a href="#"><i class="fa fa-users"></i> <span>Talento humano</span>
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+<ul class="treeview-menu">
+<?php	
+
+if (3>$_SESSION['snr_tipo_oficina']) { 			  
+ echo '<li><a href="votacion_copasst.jsp"><i class="fa fa-user"></i> <span>Votación COPASST</span></a></li>';
+ } else {} 
+ ?>	
+<li><a href="edl.jsp"><i class="fa fa-user"></i> <span>Evaluación Desempeño</span></a></li>
+<li><a href="gimnasio.jsp"><i class="fa fa-user"></i> <span>Gimnasio 2022</span></a></li>
+<li><a href="credito_icetex.jsp"><i class="fa fa-user"></i> <span>Crédito educativo Icetex</span></a></li>
+<li><a href="olimpiadas.jsp"><i class="fa fa-user"></i> <span>Olimpiadas 2022</span></a></li>
+<li><a href="encuentrocultural.jsp"><i class="fa fa-user"></i> <span>Encuentro Cultural 2022</span></a></li>
+<li><a href="incentivo_educativo.jsp"><i class="fa fa-user"></i> <span>Bono educativo 2022</span></a></li>
+<li><a href="condicion_salud.jsp"><i class="fa fa-user"></i> <span>Condicion de salud</span></a></li>
+</ul>
+                  </li>
+	<?php } else {} ?>
+
+
+ 
+
+<?php
+$nump95=privilegios(95,$_SESSION['snr']);
+ if ((2==$_SESSION['snr_tipo_oficina'] and 1==$_SESSION['snr_grupo_cargo']) or 1==$_SESSION['rol'] or 0<$nump95) { ?>
+<li><a href="reporte_diario_orip.jsp"><i class="fa fa-home"></i> <span>Reporte Diario ORIP</span></a></li>
+<?php } else {} ?>	
+
+
+<?php
+ if (1==$_SESSION['rol'] ) { ?>
+<li><a href="catastro_gestor.jsp"><i class="fa fa-home"></i> <span>Gestores Catastrales</span></a></li>
+<?php } else {} ?>
+
+
+<li><a href="notarias.jsp"><i class="fa fa-bank"></i> <span>Notarias</span></a></li>
+<li><a href="curadurias.jsp"><i class="fa fa-home"></i> <span>Curadurias</span></a></li>
+
+
+    <?php	
+	$nump62=privilegios(62,$_SESSION['snr']);
+	$nump63=privilegios(63,$_SESSION['snr']);
+	$nump64=privilegios(64,$_SESSION['snr']);
+	if (1==$_SESSION['rol'] or 0<$nump62 or 0<$nump63 or 0<$nump64 or 3==$_SESSION['snr_tipo_oficina']) { ?>				  
+  <li><a href="beneficio_notariado.jsp"><i class="fa  fa-cubes"></i> <span>Apoyo económico</span></a></li>
+    <?php } else { } ?>	
+	
+	
+		<?php if (1==$_SESSION['snr_tipo_oficina']) { ?>				  
+  <li><a href="correspondencia.jsp"><i class="fa fa-file-pdf-o"></i> <span>Correspondencia</span></a></li>
+    <?php } else {} ?>	
+
+	<?php	if (1==$_SESSION['snr_tipo_oficina']) { ?>				  
+  <li><a href="resoluciones.jsp"><i class="fa fa-list"></i> <span>Resoluciones</span></a></li>
+   
+	<?php	} else {}?>	
+	
+	
+	
+	<?php
+	if (1==$_SESSION['rol'] or 24==$_SESSION['snr_grupo_area'] or (2==$_SESSION['snr_tipo_oficina'] && 
+(192==$_SESSION['id_oficina_registro'] or 138==$_SESSION['id_oficina_registro'] or 24==$_SESSION['snr_grupo_area']))) 
+{ echo '<li><a href="agenda&'.$_SESSION['snr'].'.jsp"><i class="fa fa-list"></i> <span>Agendamiento</span></a></li>';
+	} else {}
+	
+	if (1==$_SESSION['snr_tipo_oficina']) {
+		$numven=0;
+	} else {
+	$numven=$_SESSION['id_oficina_registro'];
+	}
+	
+     $nump102=privilegios(102,$_SESSION['snr']);
+	if (1==$_SESSION['rol'] or (0<$nump102 && 1==$_SESSION['snr_grupo_cargo'])) { 
+	echo '<li><a href="ventanillas&'.$numven.'.jsp"><i class="fa fa-list"></i> <span>Ventanillas</span></a></li>';
+	} else {}
+	?>
+	
+	
+	<?php	
+	$ubicapermiso=existenciaubicacion($_SESSION['snr']);
+	$nump82=privilegios(82,$_SESSION['snr']);
+	
+	if (1==$_SESSION['rol'] or 0<$ubicapermiso or 0<$nump82) { ?>				  
+  <li><a href="puntos_ubicacion.jsp"><i class="fa fa-list"></i> <span>Ubicaciones SNR</span></a></li>
+	<?php	} else {} ?>	
+	
+	
+		<?php	
+	$nump77=privilegios(77,$_SESSION['snr']);
+		
+		if (1==$_SESSION['rol'] or 3>$_SESSION['snr_tipo_oficina']) { ?>				  
+  <li><a href="sistema_gestion_calidad.jsp"><i class="fa fa-list"></i> <span>Sistema de gestión</span></a></li>
+	 <li><a href="tipologias_gestion.jsp"><i class="fa fa-list"></i> <span>Tipologias Sistema de gestión</span></a></li>
+	
+
+	
+	<?php	} else {}?>	
+	
+	
+	<?php	if (1==$_SESSION['snr_tipo_oficina']) { ?>	
+	<li class="treeview">
+                    <a href="#"><i class="fa fa-link"></i> <span>Portal</span>
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu">
+	
+			<?php	
+		$nump73=privilegios(73,$_SESSION['snr']);
+		$nump78=privilegios(78,$_SESSION['snr']);
+		$nump76=privilegios(76,$_SESSION['snr']);
+		if (1==$_SESSION['rol'] or 0<$nump77 or 0<$nump73 or 0<$nump78 or 0<$nump76) { ?>				  
+  <li><a href="archivos_portal.jsp"><i class="fa fa-list"></i> <span>Archivos de Portal</span></a></li>
+	<?php	} else {}?>	
+	
+	
+		<?php	
+		
+if (1==$_SESSION['rol'] or 0<$nump78)  { ?>				  
+ <!-- <li><a href="contenidos_portal.jsp"><i class="fa fa-list"></i> <span>Contenido para Portal</span></a></li>-->
+<li><a href="https://www.supernotariado.gov.co/snradmin" target="_blank"><i class="fa fa-list"></i> <span>Contenido para Portal</span></a></li>
+<?php	} else {}?>	
+	
+	
+			<?php	
+		$nump79=privilegios(79,$_SESSION['snr']);
+		if (1==$_SESSION['rol'] or 0<$nump79) { ?>				  
+  <!--<li><a href="banner_portal.jsp"><i class="fa fa-list"></i> <span>Banner de Portal</span></a></li>-->
+  <li><a href="portal.jsp"><i class="fa fa-list"></i> <span>Accesos a Portal</span></a></li>
+	<?php	} else {} ?>	
+	
+			<?php	
+		$nump80=privilegios(80,$_SESSION['snr']);
+		//if (1==$_SESSION['rol'] or 0<$nump80) 
+if (1==2) {			?>				  
+  <li><a href="galerias.jsp"><i class="fa fa-list"></i> <span>Galeria / Imagenes</span></a></li>
+	<?php	} else {}?>	
+	  </ul>
+                  </li>
+	 <?php } else {} ?>	
+	 
+	 
+	 
+	
+		<?php	if (3>$_SESSION['snr_tipo_oficina']) { ?>	
+	<li class="treeview">
+                    <a href="#"><i class="fa fa-link"></i> <span>Publicaciones</span>
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu">
+				<li><a href="resoluciones_publicas.jsp">Resoluciones públicas</a></li>
+					<li><a href="estados_financieros.jsp">Estados financieros</a></li>
+					<li><a href="derechos_preferencia.jsp">Derechos de preferencia</a></li>
+					<li><a href="carrera_notarial.jsp">Carrera Notarial</a></li>
+					<li><a href="informes_ci.jsp">Informes Control Interno</a></li>
+                    </ul>
+                  </li>
+				  
+				  
+	 <?php } else {} ?>	
+	 
+	 
+	 
+	 
+	 
+	 	<?php	if (3>$_SESSION['snr_tipo_oficina']) { ?>	
+	<li class="treeview">
+                    <a href="#"><i class="fa fa-link"></i> <span>Normatividad</span>
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu">
+					<li><a href="archivos_historicos.jsp">Históricos</a></li>
+                  <li><a href="circulares.jsp">Circulares</a></li>
+					<li><a href="autos.jsp">Autos</a></li>
+					<li><a href="tutelas.jsp">Tutelas</a></li>
+					<li><a href="memorandos.jsp">Memorandos</a></li>
+					<li><a href="instrucciones_administrativas.jsp">Instrucciones admin.</a></li>
+					 <li><a href="conceptos_portal.jsp">Conceptos</a></li>
+					 <li><a href="conceptos.jsp">Conceptos de OAJ</a></li>
+					 <li><a href="sentencias.jsp">Sentencias</a></li>
+	 
+	<?php	
+	if (1==$_SESSION['rol'] or 1==$_SESSION['snr_tipo_oficina']) { ?>				  
+  <li><a href="notificacion_aviso.jsp">Notificaciones por aviso</a></li>
+	<?php	} else { } ?>	
+	
+				
+					
+                    </ul>
+                  </li>
+				  
+				  
+	 <?php } else {} ?>	
+
+	
+
+	
+	
+	   <?php	
+	$nump66=privilegios(66,$_SESSION['snr']);
+	$nump67=privilegios(67,$_SESSION['snr']);
+	$nump68=privilegios(68,$_SESSION['snr']); 
+	if (1==$_SESSION['rol'] or 0<$nump66 or 0<$nump67 or 0<$nump68){ ?>				  
+  <li><a href="cuotas_partes_entidades.jsp"><i class="fa  fa-cubes"></i> <span>Cuotas partes</span></a></li>
+    <?php } else { } ?>	
+	
+	
+	
+
+	 
+	
+
+	
+	
+	<?php
+$nump25=privilegios(25,$_SESSION['snr']);
+$nump26=privilegios(26,$_SESSION['snr']);
+$nump27=privilegios(27,$_SESSION['snr']);
+$nump28=privilegios(28,$_SESSION['snr']);
+$nump29=privilegios(29,$_SESSION['snr']);
+$nump30=privilegios(30,$_SESSION['snr']);
+	if (1==$_SESSION['rol'] or 40==$_SESSION['snr_grupo_area'] or 0<$nump25 or 0<$nump26 or 0<$nump27 or 0<$nump28  or 0<$nump29 or 0<$nump30) { ?>
+
+	  <li><a href="cuentas_cobro.jsp"><i class="fa  fa-cubes"></i> <span>Cuentas de cobro</span></a></li>
+    <?php } else {} ?>
+	
+	
+	
+	
+	<?php
+$nump38=privilegios(38,$_SESSION['snr']);
+$nump39=privilegios(39,$_SESSION['snr']);
+$nump40=privilegios(40,$_SESSION['snr']);
+$nump41=privilegios(41,$_SESSION['snr']);
+$nump42=privilegios(42,$_SESSION['snr']);
+$nump43=privilegios(43,$_SESSION['snr']);
+		if (1==$_SESSION['rol'] or 40==$_SESSION['snr_grupo_area'] or 0<$nump38 or 0<$nump39 or 0<$nump40 or 0<$nump41  or 0<$nump42 or 0<$nump43) { ?>
+
+	  <li><a href="cuenta_factura.jsp"><i class="fa  fa-cubes"></i> <span>Facturas</span></a></li>
+    <?php } else {} ?>
+	
+	
+	<?php
+$nump44=privilegios(44,$_SESSION['snr']);
+$nump45=privilegios(45,$_SESSION['snr']);
+$nump46=privilegios(46,$_SESSION['snr']);
+$nump47=privilegios(47,$_SESSION['snr']);
+$nump48=privilegios(48,$_SESSION['snr']);
+$nump49=privilegios(49,$_SESSION['snr']);
+		if (1==$_SESSION['rol'] or 40==$_SESSION['snr_grupo_area'] or 0<$nump44 or 0<$nump45 or 0<$nump46 or 0<$nump47  or 0<$nump48 or 0<$nump49) { ?>
+	  <li><a href="cuenta_servicio.jsp"><i class="fa  fa-cubes"></i> <span>Gastos - Servicios</span></a></li>
+    <?php } else {} ?>
+	
+	
+	<?php 
+	$nump100 = privilegios(100, $_SESSION['snr']); 
+	$nump101 = privilegios(101, $_SESSION['snr']); 
+
+if (0 < $nump101 or 0 < $nump100 OR 1 == $_SESSION['rol']) { ?>
+ <li><a href="comision_reporte.jsp"><i class="fa  fa-cubes"></i> <span>Reporte de Comisiones</span></a></li>
+
+<?php } else {} ?>
+	
+	
+  
+ <li><a href="licencias.jsp"><i class="fa fa-file-text-o"></i> <span>Licencias</span></a></li>
+	
+
+	<?php	
+	$nump10=privilegios(10,$_SESSION['snr']);
+	
+	if (1==$_SESSION['rol'] or 0<$nump10) { ?>				  
+  <li><a href="auditoria.jsp"><i class="fa  fa-cubes"></i> <span>Auditoria</span></a></li>
+    <?php } else {} ?>	
+	
+	
+	
+			<?php	
+		
+if (1==$_SESSION['rol'])  { ?>				  
+<li><a href="contenidos.jsp"><i class="fa fa-list"></i> <span>Contenidos OTI</span></a></li>
+<?php } else {} ?>	
+	
+	
+	
+	<?php if (1==$_SESSION['rol'] or 3184==$_SESSION['snr']) { ?>
+	<li><a href="tablas.jsp"><i class="fa  fa-server"></i> <span>Tablas DB</span></a></li>
+		   <?php } else { } ?>	
+
+		   
+<?php if (1==$_SESSION['rol']) { ?>
+                  <li class="treeview">
+                    <a href="#"><i class="fa fa-link"></i> <span>Configuración</span>
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu">
+					<li><a href="http://192.168.40.174/CAisd/pdmweb.exe" target="blank">Soporte</a></li>
+                      <li><a href="pantalla_perfil.jsp">Privilegios</a></li>
+					  <li><a href="https://sisg.supernotariado.gov.co/usuarios_vur.jsp">Usuarios VUR</a></li>
+					   <li><a href="https://sisg.supernotariado.gov.co/usuarios_iris.jsp">Usuarios Iris</a></li>
+					   <li><a href="https://sisg.supernotariado.gov.co/consulados.jsp">Consulados</a></li>
+					  <li><a href="https://sisg.supernotariado.gov.co/consules.jsp">Consules</a></li>
+					  
+					   <li><a href="https://sisg.supernotariado.gov.co/comision_control_dia.jsp">Control comisiones</a></li>
+					
+                      <!--<li><a href="incidencias.jsp">Incidencias</a></li>-->
+					  <li><a href="mantenimiento_preventivo.jsp">Mantenimiento P</a></li>
+					  <li><a href="https://datastudio.google.com/reporting/175uuJZPOEcawsqAmNlXL9Gvcv9G8YF-l/page/cZtg" target="black">Analisis T.</a></li>
+						
+                    </ul>
+                  </li>
+<?php } else {} ?>
+
+                </ul>
+                <!-- /.sidebar-menu -->
+              </section>
+              <!-- /.sidebar -->
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper">
+              <!-- Content Header (Page header) -->
+              <section class="content-header">
+
+
+
+                  <div class="row" style="background:#222D32;margin-top:-15px;padding-top:4px;">
+                  <div class="col-md-6" >
+
+               
+<a href="./" style="color:#fff;"> SISTEMA INTEGRADO DE SERVICIOS Y GESTIÓN</a>
+				
+				
+			   
+
+      
+ <?php if (1==2) { //$_SESSION['snr_tipo_oficina'] ?>	  
+<div class="salert"></div>
+ <marquee style="color:#fff;background:#000;">Actualmente los sistemas de la SNR presentan problemas de red.</marquee>
+ <?php  } else { } ?>
+
+                  </div>
+        
+
+<a ><div class="col-lg-1 col-xs-2 iconos text-center">
+       <span style="width:40px;"></span>
+        <br />
+        </div></a>
+		
+		<a  href="pqrs_central.jsp">
+		<div class="col-lg-1 col-xs-2 iconos text-center">
+        <img src="images/icons/bar-graph.svg" style="width:40px;">
+        <br />
+        NivelCentral
+        </div></a>
+        <a  href="mapa_orips.jsp">
+		<div class="col-lg-1 col-xs-2 iconos text-center">
+        <img src="images/icons/bar-graph90.svg" style="width:40px;">
+        <br />
+        ORIP
+        </div></a>
+         <a  href="mapa_notarias.jsp"><div class="col-lg-1 col-xs-2 iconos text-center">
+        <img src="images/icons/list.svg" style="width:54px;">
+        <br />
+        Notariado
+        </div></a>
+        <a  href="analisis.jsp"><div class="col-lg-1 col-xs-2 iconos text-center">
+        <img src="images/icons/pie-chart.svg" style="width:40px;">
+        <br />
+        Curadurias
+        </div></a>
+		<a  href="pqrs_control.jsp"><div class="col-lg-1 col-xs-2 iconos text-center">
+        <img src="images/icons/line-graph.svg" style="width:40px;">
+        <br />
+        PQRS
+        </div></a>
+       <!--  <a  href="mapa_orips.jsp"><div class="col-lg-1 col-xs-2 iconos text-center">
+       <img src="images/icons/house.svg" style="width:45px;">
+        <br />
+        ORIP
+        </div></a>-->
+               
+
+                </div>  
+
+
+
+              </section>
+
+              <section class="content container-fluid">
+
+        <div id="portada">
+
+<form method="POST" action="" name="formulario_borrar">
+<input type="hidden" name="borrarregistro" id="borrarregistro" value="">
+<input type="hidden" name="borrardetabla" id="borrardetabla" value="">
+</form>
+
+
+<?php	
+		
+if (isset($_POST['borrarregistro']) and ""!=$_POST['borrarregistro'] and isset($_POST['borrardetabla']) and ""!=$_POST['borrardetabla']) {
+ echo borrarregistro($_POST["borrardetabla"], $_POST["borrarregistro"]);
+} else {}
+		
+			
+		
+		
+$actualizar63 = mysql_query("SELECT valor FROM configuracion WHERE id_configuracion=12 limit 1", $conexion) or die(mysql_error());
+$row163 = mysql_fetch_assoc($actualizar63);
+$valor3 = $row163['valor'];
+
+if (0==$valor3) { ?>
+<div class="row">
+<div class="col-md-12" >
+<div class="panel panel-default">
+  <div class="panel-body">
+  <h4>El sistema se encuentra en mantenimiento. Lamentamos el inconveniente.</h4>
+<br>		
+</div>
+</div>
+</div>
+</div>
+<?php
+} else {
+	 
+		
+        if (isset($_GET['q']) and ""!=$_GET['q']) {
+        $option=$_GET['q'];
+       $q=$_GET['q'];
+        require_once('pages/'.$option.'.php'); 
+
+        } else {
+        require_once('pages/portada.php'); 
+        }
+		
+ }
+ 
+ mysql_free_result($actualizar63);
+        ?>
+
+
+
+        </div>
+         <!-- /.row -->
+
+
+
+
+              </section>
+              <!-- /.content -->
+            </div>
+            <!-- /.content-wrapper -->
+
+            <!-- Main Footer -->
+            <footer class="main-footer">
+
+        SUPERINTENDENCIA DE NOTARIADO Y REGISTRO /
+        Nit 899.999.007-0 / Calle 26 No. 13-49 Interior 201. / Conmutador : 57+(1) 328 2121 
+
+<?php //echo $arrayca['SM_USER'].' - '.$arrayca['SM_NTLMCTX']; ?>
+
+              <!-- To the right -->
+              <div class="pull-right hidden-xs">
+                <a href="http://www.supernotariado.gov.co" target="_blank">www.supernotariado.gov.co</a>
+              </div>
+
+
+            </footer>
+
+            <!-- Control Sidebar -->
+            <aside class="control-sidebar control-sidebar-dark">
+              <!-- Create the tabs -->
+              <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+                <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab" title="Manuales"><i class="fa fa-book"></i></a></li>
+                <li><a href="#control-sidebar-settings-tab" data-toggle="tab" title="Soporte"><i class="fa fa-comments-o"></i></a></li>
+              </ul>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <!-- Home tab content -->
+
+                <!-- /.tab-pane -->
+                <!-- Stats tab content -->
+                <div class="tab-pane" id="control-sidebar-stats-tab">Mi perfil</div>
+                <!-- /.tab-pane -->
+                <!-- Settings tab content -->
+                <div class="tab-pane" id="control-sidebar-settings-tab">
+
+                    <h3 class="control-sidebar-heading">Soporte: +57 (1) 3282121</h3>
+
+                    <div class="form-group">
+
+					   <ul class="control-sidebar-menu">
+                    <li>
+  <div class="menu-info">
+                          <h4 class="control-sidebar-subheading">Oficina de Tecnologias de la Información</h4>
+                          <p>ana.diaz@supernotariado.gov.co<br>Ext: 1240</p>
+                        </div>
+                    </li>
+				
+					 <li>
+ <div class="menu-info">
+                          <h4 class="control-sidebar-subheading">
+						  <a href="https://sisg.supernotariado.gov.co/images/RES_10164.pdf" style="color:#fff;" target="_blank">
+						  Grupo para el control y vigilancia de Curadores Urbanos</a></h4>
+                          <p>miriam.oviedo@supernotariado.gov.co<br>Ext: 3217</p>
+                        </div>
+             </li>
+					
+					
+					 <li>
+<div class="menu-info">
+                   <h4 class="control-sidebar-subheading">Notariado</h4>
+                          <p>miguel.gonzalez@supernotariado.gov.co<br>Ext: 1152 - 1053</p>
+                        </div>
+                
+                    </li>
+					
+					
+					<hr>
+					<h3 class="control-sidebar-heading"> &nbsp; Formatos</h3>
+					 <li>
+                      <a href="images/PR10_FR01_Solicitud_del_Cambi- RFC_V1_03-08-2018.doc" target="_blank">
+                        <i class="menu-icon fa fa-book bg-red"></i>
+                        <div class="menu-info">
+                          <h4 class="control-sidebar-subheading">Formato  de solicitud de cambio</h4>
+                          <p>En formato Word</p>
+                        </div>
+                      </a>
+                    </li>
+					
+					
+					 <li>
+                      <a href="documentos/Formato_Administracion_Usuarios.xlsx" target="_blank">
+                        <i class="menu-icon fa fa-book bg-red"></i>
+                        <div class="menu-info">
+                          <h4 class="control-sidebar-subheading">Formato de gestión de usuarios</h4>
+                          <p>En formato Excel</p>
+                        </div>
+                      </a>
+                    </li>
+					
+					
+		 
+					
+                  </ul>
+
+
+
+
+
+                    </div>
+
+
+                        </div>
+
+                  <div class="tab-pane active" id="control-sidebar-home-tab">
+                  <h3 class="control-sidebar-heading">Manuales</h3>
+                  <ul class="control-sidebar-menu">
+				  
+				  
+				  
+				  	
+
+
+		<?php
+$querymm = sprintf("SELECT * FROM manual where estado_manual=1 order by id_manual"); 
+$selectmm = mysql_query($querymm, $conexion) or die(mysql_error());
+$rowmm = mysql_fetch_assoc($selectmm);
+$totalRowsmm = mysql_num_rows($selectmm);
+if (0<$totalRowsmm){
+do {
+
+	?>
+	 <li>
+                      <a href="<?php echo $rowmm['url_manual']; ?>" target="_blank">
+                        <i class="menu-icon fa fa-book bg-red"></i>
+                        <div class="menu-info">
+                          <h4 class="control-sidebar-subheading"><?php echo $rowmm['nombre_manual']; ?></h4>
+                          <p>En formato <?php echo $rowmm['formato']; ?></p>
+                        </div>
+                      </a>
+                    </li>
+<?php
+	 } while ($rowmm = mysql_fetch_assoc($selectmm)); 
+} else {}	 
+mysql_free_result($selectmm);
+?>
+
+
+		
+                
+					
+					
+					  
+					 
+					
+					
+                  </ul>
+                  
+                  <!-- /.control-sidebar-menu 
+
+                  <h3 class="control-sidebar-heading">Compromisos</h3>
+                  <ul class="control-sidebar-menu">
+                    <li>
+                      <a href="javascript:;">
+                        <h4 class="control-sidebar-subheading">
+                          Custom Template Design
+                          <span class="pull-right-container">
+                            <span class="label label-danger pull-right">70%</span>
+                          </span>
+                        </h4>
+
+                        <div class="progress progress-xxs">
+                          <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
+                        </div>
+                      </a>
+                    </li>
+                  </ul>
+                  <!-- /.control-sidebar-menu -->
+
+                </div>
+                <!-- /.tab-pane -->
+              </div>
+            </aside>
+            <!-- /.control-sidebar -->
+          <!-- Add the sidebar's background. This div must be placed
+          immediately after the control sidebar -->
+          <div class="control-sidebar-bg"></div>
+        </div>
+       
+        <!-- ./wrapper -->
+        
+        
+        <!-- REQUIRED JS SCRIPTS -->
+        <script src="bootstrap/js/bootstrap.min.js"></script>        
+        <script src="dist/js/adminlte.min.js"></script>
+        <script src="dist/js/jput-2.js"></script>
+
+		
+        <script type="text/javascript" src="dist/js/pages/expensa.js"></script>
+       
+        <script src='dist/js/jquerynumber.js'></script>
+        <!-- Slimscroll -->
+        <!--<script src="plugins/slimscroll/jquery.slimscroll.min.js"></script>-->
+        <!-- FastClick -->
+        <script src="plugins/fastclick/fastclick.js"></script>
+        <!-- icheck -->
+        <script src="plugins/iCheck/icheck.min.js"></script>
+        <!-- Bootstrap WYSIHTML5 -->
+        <script src="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+        <!-- Page Script -->
+        <script>
+          $(function () {
+            //Add text editor
+            $("#compose-textarea").wysihtml5();
+          });
+        </script>
+
+  
+		
+		
+		
+		
+		
+
+ <?php if (isset($_GET['q'])) { ?>
+   <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>          
+
+    <script src="jstable/<?php echo $_GET['q']; ?><?php if (isset($_GET['i'])) { $id=$_GET['i']; echo '&'.$id; } else {} ?>.js"></script>   
+    <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip(); 
+    });
+    </script> 
+ <?php } else { ?>
+	<!--
+	    <link href='plugins/fullcalendar/fullcalendar.css' rel='stylesheet' />
+        <link href='plugins/fullcalendar/fullcalendar.print.css' rel='stylesheet' media='print' />
+        <script src='plugins/fullcalendar/lib/moment.min.js'></script>
+        <script src='plugins/fullcalendar/lib/jquery.min.js'></script> 
+        <script src='plugins/fullcalendar/fullcalendar.min.js'></script>
+        <Script src='plugins/fullcalendar/lang/es.js'></script>
+	-->
+ <?php } ?>
+
+
+<script src="plugins/select2/select2.full.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+-->
+
+
+
+
+
+
+
+<script src="plugins/ckeditor40/ckeditor.js"></script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_modelo_respuesta_pqrs');
+  })
+ 
+</script>
+
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_acto_admin_x_licencia');
+  })
+ 
+</script>
+
+
+<script>
+  $(function () {
+	CKEDITOR.replace('asunto_control');    
+  })
+</script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('nombre_requerir_pqrs');    
+  })
+</script>
+<script>
+  $(function () {
+	CKEDITOR.replace('respuesta_pre_ciudadano');    
+  })
+</script>
+
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_modelo_respuesta_pqrs2');    
+  })
+</script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_requerir');    
+  })
+</script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_trasladar');    
+  })
+</script>
+
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_info_ciudadano');    
+  })
+</script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_para_conocimiento');    
+  })
+</script>
+
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_trasladar_ciudadano');    
+  })
+</script>
+
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_control_ciudadano');    
+  })
+</script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_ampliacion_terminos');    
+  })
+</script>
+
+<script>
+  $(function () {
+	CKEDITOR.replace('texto_pqrs3');    
+  })
+</script>
+
+
+
+<script>
+  $(function () {
+   $('.updateggg').click(function(){   
+    var ma =this.id;
+    jQuery.ajax({
+    type: "POST",
+    url: "pages/expensafactura.php",
+    data: 'option='+ma,
+    async: true,
+      success: function(b) {
+      jQuery('#divupdate').html(b);
+      }
+    })
+  });
+  
+   })
+  </script>
+
+  <script>
+  $(function () {
+   $('.anularggg').click(function(){   
+    var ma =this.id;
+    jQuery.ajax({
+    type: "POST",
+    url: "pages/expensaanular.php",
+    data: 'option='+ma,
+    async: true,
+      success: function(b) {
+      jQuery('#divanular').html(b);
+      }
+    })
+  });
+  
+   })
+  </script>
+
+
+   <script>
+  $(function () {
+   $('.invegar').click(function(){   
+    var ma =this.id;
+    jQuery.ajax({
+    type: "POST",
+    url: "pages/inventario_obj_detalle.php",
+    data: 'option='+ma,
+    async: true,
+      success: function(b) {
+      jQuery('#divinvegar').html(b);
+      }
+    })
+  });
+  
+   })
+  </script>
+
+   <script>
+  $(function () {
+   $('.tramitarinvegar').click(function(){   
+    var ma =this.id;
+    jQuery.ajax({
+    type: "POST",
+    url: "pages/inventario_tramitarinvegar.php",
+    data: 'option='+ma,
+    async: true,
+      success: function(b) {
+      jQuery('#divtramitarinvegar').html(b);
+      }
+    })
+  });
+  
+   })
+  </script>
+
+    <script>
+  $(function () {
+   $('.actesc').click(function(){   
+    var ma =this.id;
+    jQuery.ajax({
+    type: "POST",
+    url: "pages/not_actesc.php",
+    data: 'option='+ma,
+    async: true,
+      success: function(b) {
+      jQuery('#divactesc').html(b);
+      }
+    })
+  });
+  
+   })
+  </script>
+
+  
+  
+<?php if ("radicado_anterior"==$_GET["q"]) { echo '<script src="plugins/jquery.base64.min.js"></script>'; } else {} ?>
+
+<script>
+
+
+
+
+        $(document).ready(function(){
+
+
+    $('.js-example-basic-multiple').select2({
+  theme: "classic"
+});
+
+
+
+
+
+	
+		$('#vigenciab').mouseover(function() {
+	    var parj = document.getElementById("vigencia").value;
+		var parju = document.getElementById("hastafecha").value;	
+             $('#vigencia_total').val(parj);
+			 $('#fecha_terminacion').val(parju);
+			 
+			   $('#vigencia1').html(parj);
+			   $('#hastafecha1').html(parju);
+			   
+        });
+		
+		
+	
+	
+		
+		
+		 $('#mmodalidad').on('click', function () {
+			
+			var idm=document.getElementById("id_modalidad_licencia").value;
+			if (10==idm) {
+        return confirm('La modalidad de modificación solo aplica a licencias de construcción, no a modificaciones de licencias vigentes. ¿Quiere continuar?');
+			} else {}
+	});
+	
+		
+		$('#retornos').click(function() {
+	    var par ='Retornada a OAC';	
+             $('.input-sm').val(par);
+			 
+        });
+		
+		
+
+
+
+       $('.enviodirectivo').click(function() {
+		    var pardir =this.id;	
+			var pardirt =this.title;	
+             $('#nombre_dir').val(pardir); 
+			 $('#para').val(pardir); 
+			 $('#parados').val(pardir); 
+			  $('#paraint').val(pardirt); 
+			  if ('1642'==pardirt) {
+			  $('#para').removeAttr( 'readonly' );
+			  } else {
+			$('#para').attr('readonly','readonly');
+			  }
+        });
+		
+		
+		
+		 $('.editar_devolucion').click(function() {
+        var percor = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/ver_edita_devolucion.php",
+          data: 'option=' + percor,
+          async: true,
+          success: function(b) {
+            jQuery('#ver_popupeditardevolucion').html(b);
+          }
+        })
+      });
+	  
+	  
+	  
+	  
+		
+		
+	$('#id_departamento_req').change(function (){
+	 		var maff =document.getElementById("id_departamento_req").value;
+			$('#ver_ofi').val('');
+			  $('#ver_ofi').attr('disabled','disabled');
+			  
+			  
+		jQuery.ajax({
+			type: "POST",url: "pages/municipios.php",data: 'option='+maff,async: true,
+			success: function(b) {
+				jQuery('#id_municipio_req').html(b);
+			}
+		})
+	});
+	
+	
+	
+	$('#id_departamento_req2').change(function (){
+	 		var maff =document.getElementById("id_departamento_req2").value;
+			$('#ver_ofi2').val('');
+			  $('#ver_ofi2').attr('disabled','disabled');
+			  
+			  
+		jQuery.ajax({
+			type: "POST",url: "pages/municipios.php",data: 'option='+maff,async: true,
+			success: function(b) {
+				jQuery('#id_municipio_req2').html(b);
+			}
+		})
+	});
+	
+	
+	
+
+		
+		
+		
+				$('.botonseccion').click(function (){
+	 		var seccionff =this.id;
+		document.getElementById("seccion").value=seccionff;
+	});
+		
+		
+		
+			$('#id_asunto_resolucion').change(function (){
+	 		var maffrr =document.getElementById("id_asunto_resolucion").value;
+		document.getElementById("nombre_resolucion").value=maffrr;
+	});
+	
+	
+	
+		
+		
+				
+		 $('.buscar_ofi').change(function (){
+					 
+		var tipof =document.getElementById("id_tipo_oficina_req").value;
+        var depcr =document.getElementById("id_departamento_req").value;
+		var muncr =document.getElementById("id_municipio_req").value;
+		var totd=tipof+'|'+depcr+'|'+muncr;
+	
+	$('#ver_ofi').removeAttr('disabled','disabled');
+	
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_oficina.php",
+								data: 'option='+tipof+'|'+depcr+'|'+muncr,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#ver_ofi').html(b);		
+                                }
+								
+	  
+                        })
+                });
+				
+			
+			
+			
+ $('#id_municipio_req2').change(function (){
+			
+		var tipof2 =document.getElementById("id_tipo_oficina_req2").value;
+        var depcr2 =document.getElementById("id_departamento_req2").value;
+		var muncr2 =document.getElementById("id_municipio_req2").value;
+		var totd2=tipof2+'|'+depcr2+'|'+muncr2;
+	
+	
+	$('#ver_ofi2').removeAttr('disabled','disabled');
+	
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_oficina.php",
+								data: 'option='+tipof2+'|'+depcr2+'|'+muncr2,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#ver_ofi2').html(b);		
+                                }
+								
+	  
+                        })
+                });
+				
+				
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		$('.buscaractualizarradicacioncuraduria').click(function() {
+        var radicadocuraduria = this.id;
+		//var radicadocuradurianame = this.name;
+		//alert(radicadocuraduria);
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/ver_detalle_actualizarradicado.php",
+          data: 'option=' + radicadocuraduria,
+          async: true,
+          success: function(b) {
+            jQuery('#ver_actualizarradicacioncuraduria').html(b);
+          }
+        })
+      });
+	  
+	  
+	  
+	  
+	  
+	  	$('.buscaractualizarfile').click(function() {
+        var maf = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/ver_detalle_radicado_file.php",
+          data: 'option=' + maf,
+          async: true,
+          success: function(b) {
+            jQuery('#ver_actualizarfile').html(b);
+          }
+        })
+      });
+	  
+	  
+	    	$('.buscarcorreccion').click(function() {
+        var mafc = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/ver_detalle_radicacion_correccion.php",
+          data: 'option=' + mafc,
+          async: true,
+          success: function(b) {
+            jQuery('#ver_actualizarcorreccion').html(b);
+          }
+        })
+      });
+		
+		
+		
+		
+		  	$('.buscargimnasio').click(function() {
+        var mafcg = this.id;
+		//alert(mafcg);
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/ver_detalle_actualizar_gimnasio.php",
+          data: 'option=' + mafcg,
+          async: true,
+          success: function(b) {
+            jQuery('#ver_actualizargimnasio').html(b);
+          }
+        })
+      });
+	  
+	  
+		
+		
+		
+		  	$('.buscardigitalizacion2018').click(function() {
+        var mafcv = this.id;
+		//alert(mafcv);
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/ver_detalle_digitalizacion2018.php",
+          data: 'option=' + mafcv,
+          async: true,
+          success: function(b) {
+            jQuery('#ver_actualizardigitalizacion2018').html(b);
+          }
+        })
+      });
+	  
+		
+		
+		/////////////////////////
+		
+		
+$('.editar_periodo').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/cuotas_partes_editar_periodo.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#diveditarperiodo').html(b);
+          }
+        })
+      });
+
+      $('.editar_sustitucion').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/cuotas_partes_editar_sustitucion.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#divEntidadSustitucion').html(b);
+          }
+        })
+      });
+
+      $('.editar_entidad').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/cuotas_partes_editar_entidad.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#divEntidadEditar').html(b);
+            // alert(b);
+          }
+        })
+      });
+
+      $('.editar_causante').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/cuotas_partes_editar_causante.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#divEntidadCausante').html(b);
+          }
+        })
+      });
+	  
+	  
+	  ///////////////////////////
+		
+		
+		
+		
+		
+		      $('#modelo_respuesta_pqrs').change(function (){
+                        var max =document.getElementById("modelo_respuesta_pqrs").value;
+                        jQuery.ajax({
+                                type: "POST",url: "pages/modelo_respuesta_pqrs.php",data: 'option='+max,async: true,
+                                success: function(b) {
+                                        jQuery('#texto_modelo_respuesta_pqrs').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+			$('#id_categoria_soporte').change(function (){
+                        var maxz =document.getElementById("id_categoria_soporte").value;
+                        jQuery.ajax({
+                                type: "POST",url: "pages/tipo_soporte.php",data: 'option='+maxz,async: true,
+                                success: function(b) {
+                                        jQuery('#id_tipo_soporte').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+			$('#id_area').change(function (){
+                        var maxzm =document.getElementById("id_area").value;
+                        jQuery.ajax({
+                                type: "POST",url: "pages/listado_grupo_area.php",
+								data: 'option='+maxzm,async: true,
+                                success: function(b) {
+                                        jQuery('#id_grupo_area').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+				$('.actualizar_situacionc').click(function (){
+					  var percc =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/actualizar_situacionc.php",
+								data: 'option='+percc,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#ver_situacionc').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+					$('#notaria_votacion').change(function (){
+					  var vot =this.value;
+					  //alert(vot);
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_votacion_notaria.php",
+								data: 'option='+vot,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#suplente').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+					$('.buscar_rev_beneficio_nota').click(function (){
+					  var percbrvvxx =this.id;
+					  // alert(percbrvvxx);
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_revbeneficio.php",
+								data: 'ben='+percbrvvxx,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_revbeneficio_nota').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+					$('.buscar_detalle_movimiento').click(function (){
+					  var percbrvvxxm =this.id;
+					   //alert(percbrvvxxm);
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_movimiento.php",
+								data: 'option='+percbrvvxxm,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#ver_detalle_movimiento').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+					$('.buscar_rev_asignacion').click(function (){
+					  var percbra =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_asignacion.php",
+								data: 'option='+percbra,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_asignacion').html(b);		
+                                }
+                        })
+                });
+				
+				
+				$('.buscar_tramite').click(function (){
+					  var percbrat =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_tramite.php",
+								data: 'option='+percbrat,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_tramite').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+						$('.buscar_rev_observacion').click(function (){
+					  var percbrao =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_observacion.php",
+								data: 'option='+percbrao,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_observacion').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				$('.buscar_beneficio').click(function (){
+					  var percb =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_beneficio.php",
+								data: 'option='+percb,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_beneficio').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				  $('.buscar_percepcion').click(function (){
+					  var perc =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_percepcion.php",
+								data: 'option='+perc,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_percepcion').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+					  $('.buscar_resolucion').click(function (){
+					  var perco =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_resolucion.php",
+								data: 'option='+perco,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_resolucion').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+					  $('.buscar_auto').click(function (){
+					  var percoa =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_auto.php",
+								data: 'option='+percoa,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_auto').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+				
+				  $('#buscarcedula').click(function (){
+					  var agendai =document.getElementById("identificacion").value;
+					   var agendav =document.getElementById("id_venta").value;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_ciudadano.php",
+								data: 'option='+agendai+'---'+agendav,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#agenda').html(b);		
+                                }
+                        })
+						
+						  $('#disponibilidad').removeAttr( 'style' );
+		  
+		                 //$('.codigo_oficina').attr('style','display:display');
+		
+		
+                });
+				
+				
+			
+				
+				
+				
+				
+					  $('.buscar_correspondencia').click(function (){
+						  var perconame =this.name;
+                      $('#radicor').html(perconame);						 
+						  
+					  var percor =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_correspondencia.php",
+								data: 'option='+percor,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_correspondencia').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+					  $('.buscar_useriris').click(function (){
+						  alert('xxx');
+						  var perconamei =this.name;
+                      $('#useri').html(perconamei);						 
+						  
+					  var percori =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/ver_detalle_useriris.php",
+								data: 'option='+percori,
+								async: true,
+                                success: function(b) {
+                                        jQuery('.ver_useriris').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+				
+$('.buscaragenda').click(function (){
+    var asignavbnaa =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_agenda.php",
+      data: 'option='+asignavbnaa,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_agenda').html(b);
+      }
+    })
+  });
+  
+  
+  $('.buscaractualizaragenda').click(function (){
+    var asignavbnaaz =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_actualizaragenda.php",
+      data: 'option='+asignavbnaaz,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_actualizaragenda').html(b);
+      }
+    })
+  });
+				
+				
+				
+	$('.buscar_asigna').click(function (){
+    var asigna =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_asigna.php",
+      data: 'option='+asigna,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_asigna').html(b);
+      }
+    })
+  });
+  
+  
+  
+  	$('.buscar_contenido').click(function (){
+    var asignav =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_contenido_portal.php",
+      data: 'option='+asignav,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_contenido').html(b);
+      }
+    })
+  });
+  
+  
+  
+    	$('.buscar_banner').click(function (){
+    var asignavb =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_banner.php",
+      data: 'option='+asignavb,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_banner').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+  
+      	$('.buscar_anexo').click(function (){
+    var asignavbn =this.id;
+	var asignavbname =this.name;
+	   $('#expedienteaviso').html(asignavbname);
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_notificacion_aviso.php",
+      data: 'option='+asignavbn,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_anexo').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+      $('.buscararchivo').click(function (){
+    var asignavbna =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_archivo.php",
+      data: 'option='+asignavbna,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_buscararchivo').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+     	$('.buscar_apostilla').click(function (){
+    var idapostilla =this.id;
+	var apostilla =this.name;
+	   $('#idapostilla').html(apostilla);
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_apostilla.php",
+      data: 'option='+idapostilla,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_apostilla').html(b);
+      }
+    })
+  });
+  
+  
+  
+       	$('.buscar_soporte').click(function (){
+    var idsoporte =this.id;
+	var soporte =this.name;
+	   $('#idsoporte').html(soporte);
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_soporte.php",
+      data: 'option='+idsoporte,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_soporte').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+  $('.buscar_factura').click(function (){
+    var fac =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_factura.php",
+      data: 'option='+fac,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_factura').html(b);
+      }
+    })
+  });
+  
+  
+   $('.buscar_encuesta_notaria').click(function (){
+    var facn =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_encuesta_notaria.php",
+      data: 'option='+facn,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_encuesta_notaria').html(b);
+      }
+    })
+  });
+    
+
+  $('.buscar_umarital_notaria').click(function (){
+    var facnm =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_union_marital.php",
+      data: 'option='+facnm,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_umarital_notaria').html(b);
+      }
+    })
+  });
+
+
+
+  $('.buscar_servicio').click(function (){
+    var facs =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_servicio.php",
+      data: 'option='+facs,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_servicio').html(b);
+      }
+    })
+  });
+  
+  
+  
+  	$('.buscar_chat').click(function (){
+    var idchat =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_chat.php",
+      data: 'option='+idchat,
+      async: true,
+      success: function(b) {
+        jQuery('.ver_conversacion_chat').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  	$('.buscarpapel').click(function (){
+    var idchatpp =this.id;
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_papel.php",
+      data: 'option='+idchatpp,
+      async: true,
+      success: function(b) {
+        jQuery('#veractualizarpapel').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+  
+  
+  $('.buscar_entidadreparto').click(function (){
+    var idchatw =this.id;
+	
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_entidadreparto.php",
+      data: 'option='+idchatw,
+      async: true,
+      success: function(b) {
+        jQuery('#ver_entidadreparto').html(b);
+      }
+    })
+  });
+  
+  
+    $('.buscar_circulonotarial').click(function (){
+    var idchatwn =this.id;
+	
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_circulo_notarial.php",
+      data: 'option='+idchatwn,
+      async: true,
+      success: function(b) {
+        jQuery('#ver_circulonotarial').html(b);
+      }
+    })
+  });
+  
+  
+  
+  
+      $('.buscar_reparto').click(function (){
+    var idchatwnr =this.id;
+	
+    jQuery.ajax({
+      type: "POST",
+      url: "pages/ver_detalle_reparto.php",
+      data: 'option='+idchatwnr,
+      async: true,
+      success: function(b) {
+        jQuery('#ver_reparto').html(b);
+      }
+    })
+  });
+  
+  
+  
+  $('.classeditarcontroldia').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/comision_control_dia_editar.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#divcontroldiaeditar').html(b);
+          }
+        })
+      });
+
+      $('.classcomisioneditar').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/comision_editar.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#divmostrarcomision').html(b);
+          }
+        })
+      });
+
+      $('.classcomisionver').click(function() {
+        var ma = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/comision_ver.php",
+          data: 'option=' + ma,
+          async: true,
+          success: function(b) {
+            jQuery('#divViewComision').html(b);
+          }
+        })
+      });
+	  
+  
+  
+				
+						  $('.edit_causante').click(function (){
+					  var percov =this.id;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/edit_causante.php",
+								data: 'option='+percov,
+								async: true,
+                                success: function(b) {
+									console.log('Causante: '+b);
+                                        jQuery('#ver_causante').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+				
+				
+					  $('.consultaposesion').click(function (){
+                        var pose =this.id;
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/posesion_notaria.php",
+								data: 'option='+pose,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoposesion').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+							  $('.actualizaposesion').click(function (){
+                        var posen =this.id;
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/situacion_notario.php",
+								data: 'option='+posen,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoactposesion').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+						  $('.consultapermiso').click(function (){
+                        var per =this.id;
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/consulta_permiso.php",
+								data: 'option='+per,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadopermiso').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+				  $('#botonconsultaciudadano22').click(function (){
+					var maxrc =document.getElementById("consultaciudadano").value;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_ciudadano2.php",
+								data: 'option='+maxrc,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoconsultaciudadano').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				$('#botonconsultaciudadano').click(function (){
+					var maxrc =document.getElementById("consultaciudadano").value;
+						jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_ciudadano.php",
+								data: 'option='+maxrc,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoconsultaciudadano1').html(b);		
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				  $('#botonconsultaf').click(function (){
+                        var maxr =document.getElementById("consultaf").value;
+						
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_funcionario.php",
+								data: 'option='+maxr,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoconsultaf').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+					  $('#botonconsultanombre').click(function (){
+                        var maxr =document.getElementById("consultanombre").value;
+						
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_funcionario_nombre.php",
+								data: 'option='+maxr,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoconsultanombre').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+				
+				
+				
+						
+					  $('#botonconsultanombre2').click(function (){
+                        var maxrt =document.getElementById("consultanombre2").value;
+						
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/buscar_funcionario_nombre2.php",
+								data: 'option='+maxrt,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#resultadoconsultanombre2').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+				
+				
+				
+				
+					  $('#id_tipo_oficina2').change(function (){
+                        var maxrjvv =document.getElementById("id_tipo_oficina2").value;
+						
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/listado_oficinas.php",
+								data: 'option='+maxrjvv,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#listado_oficinas').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+				
+					  $('#id_tipo_oficina4').click(function (){
+                        var maxrjg =document.getElementById("id_tipo_oficina4").value;
+						
+                        jQuery.ajax({
+                                type: "POST",
+								url: "pages/listado_oficinas4.php",
+								data: 'option='+maxrjg,
+								async: true,
+                                success: function(b) {
+                                        jQuery('#listado_oficinas4').html(b);
+										
+                                }
+                        })
+                });
+				
+				
+				
+   
+					
+				
+				   $('#ver_cedula').click(function (){
+					   $('#cedula_percepcion').removeAttr( 'style' );
+                });
+				
+				
+				
+		
+		$('#respuesta').click(function() {
+        $('.botonrespuesta').attr('style','display:none;');
+		$('.formulariorespuesta').removeAttr( 'style' );
+        });
+
+		
+		
+		
+	 $('#id_tipo_correspondencia').change(function() {
+        var martcor =this.value;
+		 if ('ER'==martcor) {	
+        $('#de_iris').removeAttr( 'readonly' );
+		$('#de_iris').val('');
+		  } else {
+		 $('#de_iris').attr( 'readonly','readonly' );
+		  }
+    });
+
+
+
+		
+
+        $('#id_tipo_oficina').change(function() {
+        var mart =document.getElementById("id_tipo_oficina").value;
+        var depc =document.getElementById("id_departamento").value;
+		var munc =document.getElementById("id_municipio").value;
+		
+		 if (1==mart) {	
+        $('#id_departamento').removeAttr( 'required' );
+		 $('#id_municipio').removeAttr( 'required' );
+        $('.ubicacion').attr( 'style','display:none;' );
+        $('.codigo_oficina').removeAttr( 'disabled' );
+		  } else {
+
+		$('#id_departamento').attr( 'required' );
+		 $('#id_municipio').attr( 'required' );
+        $('.ubicacion').attr( 'style','display:display;' );
+		$('.codigo_oficina').attr('disabled','disabled');
+                }
+				
+				
+				 if (2==mart || 3==mart || 4==mart) { 
+					 $('.codigo_oficina').removeAttr( 'disabled' );
+				}
+				
+				
+				
+				   jQuery.ajax({
+                                type: "POST",url: "pages/buscar_oficina.php",data: 'option='+mart+'|'+depc+'|'+munc,async: true,
+                                success: function(b) {
+                                        jQuery('#codigo_oficina').html(b);
+	
+                                }
+                        })
+				
+				
+        });
+		
+		
+		
+		
+
+     $('#id_clase_licencia').change(function() {
+        var mart =document.getElementById("id_clase_licencia").value;	
+		 if (6==mart) {
+ $('#vigencia_reconocimiento').attr('style','display:none');
+   $('#area_construida').attr('style','display:none'); 
+		 } else {
+		
+                if (4<=mart) {	
+ 
+ $('#area_construida').removeAttr( 'style' );
+
+   if (4==mart) {
+ $('#vigencia_reconocimiento').attr('style','display:none');
+} else {
+ $('#vigencia_reconocimiento').removeAttr( 'style' );
+
+}
+
+                } else {
+        $('#vigencia_reconocimiento').attr('style','display:none');
+   $('#area_construida').attr('style','display:none');
+                }		
+		 }
+        });
+
+
+
+
+
+		  $('#pregorip11').attr('readonly','readonly');
+        $('#pregorip12').attr( 'readonly','readonly' );
+		$('#pregorip13').attr('readonly','readonly');
+		
+			 $('#pregorip10').mouseover(function() {
+         var uno =document.getElementById("pregorip1").value;
+		 var dos =document.getElementById("pregorip2").value;
+         var nueve =document.getElementById("pregorip9").value;
+        var diez =document.getElementById("pregorip10").value; 
+	var once=uno-nueve;
+	var doce=dos-diez;
+	var trece=once+doce;	
+	 $('#pregorip11').val(once);
+	 $('#pregorip12').val(doce);
+	 $('#pregorip13').val(trece);
+        });
+		
+		
+		
+				
+	 $('#tipo_predio').change(function() {
+                //var par=this.val;
+        var marvp =document.getElementById("tipo_predio").value;
+                if (1==marvp) {	
+        $('#rural').attr('style','display:display;color:#000');
+        $('#rural1').attr( 'required','required' );
+		$('#urbano').attr('style','display:none');
+        $('#urbano1').removeAttr( 'required','required' );
+		
+                } else if (3==marvp) {
+   $('#rural').attr('style','display:display;color:#000');
+        $('#rural1').attr( 'required','required' );
+		$('#urbano').attr('style','display:none');
+        $('#urbano1').removeAttr( 'required','required' );
+		
+		      } else if (2==marvp) {
+        $('#urbano').attr('style','display:display;color:#000');
+        $('#urbano1').attr( 'required','required' );
+		$('#rural').attr('style','display:none');
+        $('#rural1').removeAttr( 'required','required' );
+		
+		 } else if (4==marvp) {
+   $('#rural').attr('style','display:display;color:#000');
+        $('#rural1').attr( 'required','required' );
+		$('#urbano').attr('style','display:none');
+        $('#urbano1').removeAttr( 'required','required' );
+		
+		
+                } else {}
+        });
+		
+		
+		
+		
+		
+		
+ $('#nombre_olimpiada').change(function() {
+    var equipos =document.getElementById("nombre_olimpiada").value;
+  if ('Futbol 5 Masculino'==equipos || 
+  'Futbol 5 Femenino'==equipos || 
+  'Baloncesto Femenino'==equipos || 
+  'Baloncesto Masculino'==equipos || 
+  'Voleibol Mixto'==equipos || 
+  'Bolos Mixto'==equipos || 
+  'Mini tejo Mixto'==equipos) {	
+        $('#vistaequipo').attr('style','display:display;');
+        $('#tipo_olimpiada').attr( 'required','required' );
+ } else {
+	    $('#vistaequipo').attr('style','display:none;');
+        $('#tipo_olimpiada').removeAttr( 'required','required' );	 
+ }
+        });
+		
+		
+		
+			
+		 $('#tipo_olimpiada').change(function() {
+ 
+        var olimpiada =document.getElementById("tipo_olimpiada").value;
+                if (0==olimpiada) {	
+        $('#name_equipo').attr('style','display:display;');
+        $('#equipo').attr( 'required','required' );
+ } else {
+	      $('#name_equipo').attr('style','display:none;');
+        $('#equipo').removeAttr( 'required','required' );
+	 
+ }
+        });
+		
+		
+		
+		
+		
+		
+			 $('#categoria_reparto').change(function() {
+             
+        var marvpgr =document.getElementById("categoria_reparto").value;
+                if (8==marvpgr) {	
+		$('#codigo').attr('style','display:display;');
+        $('#codigo').attr( 'required','required' );
+        $('#unidades').attr('style','display:display;');
+        $('#unidades').attr( 'required','required' );
+                } else  {
+ 	$('#codigo').attr('style','display:none;');
+        $('#codigo').removeAttr( 'required','required' );
+        $('#unidades').attr('style','display:none;');
+        $('#unidades').removeAttr( 'required','required' );
+		 
+
+                } 
+        });
+		
+		
+		
+		
+		
+		 $('#tipo_gimnasio').change(function() {
+                //var par=this.val;
+        var marvpg =document.getElementById("tipo_gimnasio").value;
+                if (1==marvpg) {	
+        $('#categoria_gimnasio').attr('style','display:display;');
+        $('#id_categoria_gimnasio').attr( 'required','required' );
+		$('#modalidad_gimnasio').attr('style','display:none');
+        $('#id_modalidad_gimnasio').removeAttr( 'required','required' );
+		 $('#id_modalidad_gimnasio').val('');
+		 
+		  $('#sede_gimnasio').attr('style','display:display;');
+        $('#id_sede_gimnasio').attr( 'required','required' );
+		 
+		 
+		 
+		
+                } else if (0==marvpg) {
+       $('#modalidad_gimnasio').attr('style','display:display;');
+        $('#id_modalidad_gimnasio').attr( 'required','required' );
+		$('#categoria_gimnasio').attr('style','display:none');
+        $('#id_categoria_gimnasio').removeAttr( 'required','required' );
+		$('#id_categoria_gimnasio').val('');
+
+$('#sede_gimnasio').attr('style','display:none');
+      $('#id_sede_gimnasio').removeAttr( 'required','required' );
+		 $('#id_sede_gimnasio').val('');
+		 
+
+                } else {}
+        });
+		
+		
+		
+		
+		
+		
+						
+	 $('#reconocimiento_vigencia2').change(function() {
+                //var par=this.val;
+        var marvpo =document.getElementById("reconocimiento_vigencia2").value;
+                if (1==marvpo) {	
+        $('#vigencia_reconocimiento1').removeAttr( 'disabled','disabled' );
+	
+		
+		              } else if (0==marvpo) {
+			 $('#vigencia_reconocimiento1').val('0');
+        $('#vigencia_reconocimiento1').attr('disabled','disabled');
+       
+                } else {}
+        });
+		
+		
+		
+		
+		
+		
+		
+		
+		   $('.notariaaporteespecialeditar').click(function() {
+        var op = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/notaria_aporte_especial_editar.php",
+          data: 'option=' + op,
+          async: true,
+          success: function(b) {
+            jQuery('#divnotariaaporteespecialeditar').html(b);
+          }
+        })
+      });
+
+      $('.notariadetalleingresoescrituracioneditar').click(function() {
+        var op = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/notaria_detalle_ingreso_escrituracion_editar.php",
+          data: 'option=' + op,
+          async: true,
+          success: function(b) {
+            jQuery('#divnotariadetalleingresoescrituracioneditar').html(b);
+          }
+        })
+      });
+
+      $('.notariaotrosactosnotarialeseditar').click(function() {
+        var op = this.id;
+        jQuery.ajax({
+          type: "POST",
+          url: "pages/notaria_otros_actos_notariales_editar.php",
+          data: 'option=' + op,
+          async: true,
+          success: function(b) {
+            jQuery('#divnotariaotrosactosnotarialeseditar').html(b);
+          }
+        })
+      });
+	  
+		
+		
+		
+		
+		
+		
+		
+		
+	 $('#id_tipo_respuesta').change(function() {
+                //var par=this.val;
+        var marv =document.getElementById("id_tipo_respuesta").value;
+                if (1==marv) {	
+        $('#correoc').attr('style','display:display;color:#ff0000');
+        $('#correo_c').attr( 'required','required' );
+		$('#direccionc').attr('style','display:none');
+        $('#direccion_c').removeAttr( 'required','required' );
+		
+                } else if (2==marv) {
+		$('#correoc').attr('style','display:none');
+        $('#correo_c').removeAttr( 'required','required' );
+        $('#direccionc').attr('style','display:display;color:#ff0000');
+        $('#direccion_c').attr( 'required','required' );
+		
+		              } else if (3==marv) {
+		$('#correoc').attr('style','display:none');
+        $('#correo_c').removeAttr( 'required','required' );
+      $('#direccion_c').removeAttr( 'required','required' );
+		$('#direccionc').attr('style','display:none');
+                } else {}
+        });
+
+
+
+
+                $('.numero').on('input', function () { 
+            this.value = this.value.replace(/[^0-9]/g,'');
+        });
+		
+		
+		   $('.numerodecimal').on('input', function () { 
+            this.value = this.value.replace(/[^0-9.]/g,'');
+        });
+		
+		
+		   $('.matriculaspermitidas').on('input', function () { 
+            this.value = this.value.replace(/[^0-9,-NSC]/g,'');
+        });
+		
+		
+		  $('.numeroscomas').on('input', function () { 
+            this.value = this.value.replace(/[^0-9,]/g,'');
+        });
+		
+		
+		   $('.sololetras').on('input', function () { 
+            this.value = this.value.replace(/[^0-9_a-z]/g,'');
+        });
+		
+		
+		$('.mayuscula').on('input', function () { 
+            this.value = this.value.toUpperCase();
+        });
+		
+
+                $('.dinero').number( true, 2 );
+
+                 $(".close").click(function(){
+                $("#insertado").alert("close");
+            });
+
+
+			
+			 $('#fecha_permiso_hasta').click(function() {
+        $('#horas_permiso').attr('style','display:none;');
+        });
+			
+			
+        $('tr').click(function() {
+        $(this).attr('style','background:#ddd');
+        });
+		
+        $('tr').dblclick(function() {
+        $(this).removeAttr( 'style' );
+        });
+
+
+
+        $('#id_clase_licencia').change(function() {
+        //var par=this.val;
+        var mar =document.getElementById("id_clase_licencia").value;
+        if (3==mar || 2==mar || 1==mar) {	
+        $('#lotes_resultantes').removeAttr( 'style' );
+        $('#lotes_resultantes1').attr( 'required','required' );
+                } else {
+        $('#lotes_resultantes').attr('style','display:none');
+        $('#lotes_resultantes1').removeAttr( 'required' );
+
+                }
+        });
+
+
+
+                $('.ventana1').click(function (){
+                        var pa =this.id;	
+                        $('.licencia').val(pa);
+                        var pap =this.id;
+                        $('.licenciac').html(pap);
+                });
+
+
+
+				
+				
+$('#id_tipo_poder').change(function() {
+var esc =document.getElementById("id_tipo_poder").value;
+         if (3==esc) {	
+        $('#escritura').attr('style','display:display;');
+		$('#vigenciaescritura').attr('style','display:none');
+		$('#numero_escritura').attr('required','');
+		$('#fecha_escritura').attr('required','');
+		$('#fecha_escritura_vigencia').removeAttr( 'required' );
+		$('#hora_vigencia').removeAttr( 'required' );
+		$('#numero_escritura2').removeAttr( 'required' );
+		$('#fecha_escritura2').removeAttr( 'required' );
+		
+		$('#id_pais').removeAttr( 'required' );
+		$('#pais').attr('style','display:none');
+		$('#infoadjunto').html('ESCRITURA PÚBLICA');
+		
+
+				}
+				
+		else if (4==esc) {	
+        $('#vigenciaescritura').attr('style','display:display;');
+		$('#escritura').attr('style','display:none');
+		$('#fecha_escritura_vigencia').attr('required','');
+		$('#hora_vigencia').attr('required','');
+		$('#numero_escritura').removeAttr( 'required' );
+		$('#fecha_escritura').removeAttr( 'required' );
+		$('#numero_escritura2').attr('required','');
+		$('#fecha_escritura2').attr('required','');
+		
+		$('#id_pais').removeAttr( 'required' );
+		$('#pais').attr('style','display:none');
+		$('#infoadjunto').html('CERTIFICADO DE VIGENCIA E.P.');
+		
+
+		
+		
+				}
+				
+				
+				else {
+		$('#escritura').attr('style','display:none');	
+		$('#vigenciaescritura').attr('style','display:none');	
+		$('#numero_escritura').removeAttr( 'required' );
+		$('#fecha_escritura').removeAttr( 'required' );
+		$('#fecha_escritura_vigencia').removeAttr( 'required' );
+		$('#numero_escritura2').removeAttr( 'required' );
+		$('#fecha_escritura2').removeAttr( 'required' );
+		$('#hora_vigencia').removeAttr( 'required' );
+		
+		$('#pais').attr('style','display:display');	
+		$('#id_pais').attr('required','');
+		
+		$('#infoadjunto').html('PODER AUTENTICADO');
+				}
+  });
+
+
+		
+		
+				
+				
+$('#id_tipo_documento_menor').change(function() {
+var erc =document.getElementById("id_tipo_documento_menor").value;
+         if (10==erc) {	
+		$('#infoadjuntocivil').html('VISA DEL MENOR');
+}
+				else {
+		$('#infoadjuntocivil').html('REGISTRO CIVIL DE NACIMIENTO');
+				}
+  });
+
+
+  
+  
+	
+
+ $('#tipo_req_tras').change(function() {
+var tipo_req_tras =document.getElementById("tipo_req_tras").value;
+         if (0==tipo_req_tras) {	
+        $('#divreq').attr('style','display:display;');
+		$('#divtras').attr('style','display:none');
+		$('#divreqciu').attr('style','display:display');
+		$('#divtrasciu').attr('style','display:none');
+				}
+				
+		else if (1==tipo_req_tras) {
+			 $('#divtras').attr('style','display:display;');
+			$('#divreq').attr('style','display:none');	
+			$('#divreqciu').attr('style','display:none');
+		$('#divtrasciu').attr('style','display:display');
+				
+				}
+				else {
+		$('#divreq').attr('style','display:none');
+		$('#divtras').attr('style','display:none');
+		$('#divreqciu').attr('style','display:none');
+		$('#divtrasciu').attr('style','display:none');
+				}
+  });
+
+  
+		
+		
+
+ $('#sale_dif_padres').change(function() {
+var padres =document.getElementById("sale_dif_padres").value;
+         if (1==padres) {	
+        $('#persona_sale').attr('style','display:display;');
+				}
+				else {
+		$('#persona_sale').attr('style','display:none');	
+				}
+  });
+
+  
+  
+  
+  
+   $('#impedimento').change(function() {
+var imp =document.getElementById("impedimento").value;
+         if ('No'==imp) {	
+        $('.siimpedimento').attr('style','display:none;');
+				}
+				else {
+		$('.siimpedimento').attr('style','display:display');	
+				}
+  });
+  
+  
+
+   $('#retorno').change(function() {
+var retorno =document.getElementById("retorno").value;
+         if (1==retorno) {	
+        $('#motivo_noretorno').removeAttr( 'required' );
+		 $('#fecha_retorno').attr('required','');
+		 $('#fecha_retorno_hasta').attr('required','');
+		  
+		 $('#si_retorno').attr('style','display:display;');
+		 $('#no_retorno').attr('style','display:none;');
+		 
+
+				}
+				else {
+					
+		 $('#no_retorno').attr('style','display:display;');
+		 $('#si_retorno').attr('style','display:none;');
+					
+		$('#fecha_retorno').removeAttr( 'required' );
+		$('#fecha_retorno_hasta').removeAttr( 'required' );
+		 $('#motivo_noretorno').attr('required','');
+	
+		 
+				}
+  });
+
+  
+  
+  
+     $('#id_tipo_documentoc').change(function() {
+var aut =document.getElementById("id_tipo_documentoc").value;
+         if (305==aut) {	
+		 $('#cedulac').attr('style','display:display;');
+		  $('#cedulacontratista').attr('required','required');
+		 } else {
+			  $('#cedulac').attr('style','display:none;');
+			  $('#cedulacontratista').removeAttr( 'required' );
+		 }
+   });
+   
+   
+   
+   
+   
+  
+   $('#id_tipo_autorizacion_salida').change(function() {
+var autorizacion =document.getElementById("id_tipo_autorizacion_salida").value;
+         if (1==autorizacion) {	
+       
+        $('#id_tipo_documento_padre').attr( 'required','required' );
+		$('#identificacion_padre').attr( 'required','required' );
+		$('#nombre_padre').attr( 'required','required' );
+		$('#id_tipo_documento_madre').removeAttr( 'required' );
+		$('#identificacion_madre').removeAttr( 'required' );
+		$('#nombre_madre').removeAttr( 'required' );
+		$('.obligapadre').attr('style','display:display;color:#ff0000;');
+		$('.obligamadre').attr('style','display:none;');
+		
+				}
+		else if (2==autorizacion) {	
+		
+		  $('#id_tipo_documento_madre').attr( 'required','required' );
+		$('#identificacion_madre').attr( 'required','required' );
+		$('#nombre_madre').attr( 'required','required' );
+		$('#id_tipo_documento_padre').removeAttr( 'required' );
+		$('#identificacion_padre').removeAttr( 'required' );
+		$('#nombre_padre').removeAttr( 'required' );
+		$('.obligamadre').attr('style','display:display;color:#ff0000;');
+		$('.obligapadre').attr('style','display:none;');
+     
+	 
+		} else if (4==autorizacion) {	
+	   $('#id_tipo_documento_padre').attr( 'required','required' );
+		$('#identificacion_padre').attr( 'required','required' );
+		$('#nombre_padre').attr( 'required','required' );
+	 	  $('#id_tipo_documento_madre').attr( 'required','required' );
+		$('#identificacion_madre').attr( 'required','required' );
+		$('#nombre_madre').attr( 'required','required' );
+	 $('.obligapadre').attr('style','display:display;color:#ff0000;');
+	 $('.obligamadre').attr('style','display:display;color:#ff0000;');
+	 
+		}	else {
+		$('#id_tipo_documento_padre').removeAttr( 'required' );
+		$('#identificacion_padre').removeAttr( 'required' );
+		$('#nombre_padre').removeAttr( 'required' );
+		$('#id_tipo_documento_madre').removeAttr( 'required' );
+		$('#identificacion_madre').removeAttr( 'required' );
+		$('#nombre_madre').removeAttr( 'required' );
+		$('.obligapadre').attr('style','display:none;');
+		$('.obligamadre').attr('style','display:none;');
+				}
+  });
+  
+  
+  
+				
+				
+	
+	
+		
+
+       $('#id_grupo').change(function (){
+                        var ma =document.getElementById("id_grupo").value;
+						
+						
+                        jQuery.ajax({
+                                type: "POST",url: "pages/funcionario_grupo.php",data: 'option='+ma,async: true,
+                                success: function(b) {
+                                        jQuery('#id_funcionario_grupo').html(b);
+										
+										
+                                }
+                        })
+                });
+
+				
+		
+        $('#id_categoria_oac').change(function (){
+                        var ma =document.getElementById("id_categoria_oac").value;
+						
+						
+                        jQuery.ajax({
+                                type: "POST",url: "pages/clase_oac.php",data: 'option='+ma,async: true,
+                                success: function(b) {
+                                        jQuery('#id_clase_oac').html(b);
+										
+										 var pa ="";	
+                                        $('#id_tema_oac').val(pa);
+										$('#id_motivo_oac').val(pa);
+										
+                                }
+                        })
+                });
+				
+				
+							
+		$('#id_clase_oac').change(function (){
+                        var ma =document.getElementById("id_clase_oac").value;
+                        jQuery.ajax({
+                                type: "POST",url: "pages/tema_oac.php",data: 'option='+ma,async: true,
+                                success: function(b) {
+                                        jQuery('#id_tema_oac').html(b);
+										
+										 var pa ="";	
+										$('#id_motivo_oac').val(pa);
+                                }
+                        })
+                });
+				
+				
+				
+		$('#id_tema_oac').change(function (){
+                        var ma =document.getElementById("id_tema_oac").value;
+                        jQuery.ajax({
+                                type: "POST",url: "pages/motivo_oac.php",data: 'option='+ma,async: true,
+                                success: function(b) {
+                                        jQuery('#id_motivo_oac').html(b);
+                                }
+                        })
+                });
+				
+				
+				
+				
+        $('#id_departamento').change(function (){
+                        var ma =document.getElementById("id_departamento").value;
+						  var pab ='<option value="" selected></option>';	
+                        $('#id_tipo_oficina').val(pab);
+                       $('#codigo_oficina').val(pab);
+			           $('.codigo_oficina').attr('disabled','disabled');
+						
+						
+                        jQuery.ajax({
+                                type: "POST",url: "pages/municipios.php",data: 'option='+ma,async: true,
+                                success: function(b) {
+                                        jQuery('#id_municipio').html(b);
+                                }
+                        })
+                });
+
+				
+		
+		  $('#id_departamentomun').change(function (){
+		var ma =document.getElementById("id_departamentomun").value;
+		jQuery.ajax({
+			type: "POST",url: "pages/municipiosid.php",data: 'option='+ma,async: true,
+			success: function(b) {
+				jQuery('#id_municipiomun').html(b);
+			}
+		})
+	});
+	
+	
+		
+		
+		
+	$('#id_procedimiento_interno').change(function (){
+		var marr =document.getElementById("id_procedimiento_interno").value;
+		jQuery.ajax({
+			type: "POST",url: "pages/accion_interna.php",data: 'option='+marr,async: true,
+			success: function(b) {
+				jQuery('#id_accion_interna').html(b);
+			}
+		})
+	});
+	
+	
+	
+
+				
+
+        $('#id_clase_licencia').change(function (){
+                        var ma =document.getElementById("id_clase_licencia").value;
+                        jQuery.ajax({
+                                type: "POST",url: "pages/modalidad_licencia.php",data: 'option='+ma,async: true,
+                                success: function(b) {
+                                        jQuery('#id_modalidad_licencia').html(b);
+                                }
+                        })
+                });
+
+
+
+
+				
+
+  $('.listarcita').on('click', function () {
+				  var mayx =this.id;
+				
+				 var opcionx = confirm('¿Confirma atención?');		 
+				  if(opcionx == true) {
+
+                 document.getElementById("acita").value=mayx;
+						 
+                 document.forms["formularioagenda"].submit();
+            	 } else {
+		         return false;
+	             }
+	            });	
+				
+	$('.noasistio').on('click', function () {
+				  var mayx =this.id;
+				
+				 var opcionx = confirm('¿Confirma que no asistio?');		 
+				  if(opcionx == true) {
+
+                 document.getElementById("acita2").value=mayx;
+						 
+                 document.forms["formularionoasistio"].submit();
+            	 } else {
+		         return false;
+	             }
+	            });	
+				
+
+
+
+                $('.seleccion').click(function (){
+                        var ma =this.id;
+
+                        jQuery.ajax({
+                                type: "POST",
+                                url: "pages/listado.php",
+                                data: 'option='+ma,
+                                async: true,
+                                success: function(b) {
+                                        //jQuery('#'+ma+'2').html(b);
+                                        $('#'+ma+'3').attr('style','display:none');
+                                        $('#'+ma+'2').html(b);
+                                }
+                        })
+                });
+
+
+				
+		
+			
+			
+	
+			
+			
+			
+			
+			
+				$('.borrar_f').on('click', function () {
+				 var opcion = confirm('¿Estas seguro de eliminar el registro?');		 
+				 var may =this.id;
+				 var mayk =this.name;
+	
+		        if(opcion == true) {
+
+                 document.getElementById("borrarregistro").value=may;
+				 document.getElementById("borrardetabla").value=mayk;				 
+				 
+                 document.forms["formulario_borrar"].submit();
+            	 } else {
+		         return false;
+	             }
+	            });	
+
+				
+				
+				
+				
+	
+	
+	 $('.adjuntar').change('click', function () {
+               document.forms["adjuntar_documento"].submit();
+            });
+	
+	
+	
+	
+			
+	
+	
+	
+	
+	$(".fobliga").submit(function () {  
+    if(($("#fecha_desde").val().length < 2) || ($("#fecha_hasta").val().length < 2)) {  
+        alert("Se deben llenar todos los campos");  
+        return false;  
+    }  
+    return true;  
+}); 
+
+
+
+	
+
+/*
+$("#obligapercepcion").submit(function () {  
+    if (
+	($("#claridad_lenguaje").val().length >0) || 
+	($("#agilidad_atencion").val().length  >0) || 	
+		($("#calidad_respuesta").val().length  >0) || 
+		($("#tiempo_respuesta").val().length  >0) || 
+		($("#amabilidad_atencion").val().length  >0) 
+	
+	) {  
+	
+        alert("Se deben seleccionar una calificación para todos los campos");  
+        return false;  
+    }  
+    return true;  
+}); 	
+	*/			
+				
+				
+				
+				  $('.solonumeros').keyup(function (){
+                    this.value = (this.value + '').replace(/[^0-9]/g, '');
+             });
+				
+				
+				
+				      $('.cerrar_pqrs_cert').on('click', function () {
+                return confirm('¿Estas seguro de cerrar la PQRS, recuerde que debe tener un anexo de respuesta (Que ya exista ó que adjunte.).?');
+            });
+			
+				
+				
+				
+                 $('.seguroelimfac').on('click', function () {
+                return confirm('¿Estas seguro de eliminar todas las facturas?');
+            });
+
+         
+
+
+
+                 $('.confirmationdel').on('click', function () {
+                return confirm('¿Estas seguro de eliminar el registro?');
+            });
+
+
+			       $('.confirmadesvincular').on('click', function () {
+                return confirm('¿Estas seguro de desvincular la PQRS?');
+            });
+
+
+
+                 $('.confirmationnot').on('click', function () {
+                return confirm('¿Esta seguro de crear el registro?');
+            });
+			
+			
+			     $('.confirmavotacion').on('click', function () {
+					 var plancha= this.id;
+				 return confirm('¿Esta seguro de votar por la plancha número: ' + plancha + '. Recuerde que una vez emitido el voto, no puede ser modificado.');
+            });
+
+
+
+	     $('.confirmaenvio').on('click', function () {
+				
+				 return confirm('Esta seguro de crear el radicado. ');
+            });
+
+
+                 $('.confirmationupdate').on('click', function () {
+                return confirm('¿Esta seguro de actualizar el registro?');
+            });
+
+			
+			     $('.confirmacioneliminacionreporteimpresoras').on('click', function () {
+                return confirm('¿Esta seguro de eliminar todos los registros?');
+            });
+			
+			
+			
+			     $('.confirmarrespuestar').on('click', function () {
+                return confirm('Una vez enviada la respuesta, no podra adjuntar documentos.');
+            });
+			
+			
+
+
+                $('#form1').submit(function (){
+                if (document.getElementById('nombre_usuario').value!="")
+                {
+                return true;
+                 }
+                 else {
+                return false; 
+                 }
+                        });
+						
+						
+						
+                /*
+                        $('.seleccion').click(function (){
+                        var ma =this.id;
+                        jQuery.ajax({
+                                type: "POST",
+                                url: "pages/listado.php",
+                                data: 'option='+ma,
+                                async: true,
+                    success: function(data){
+              $.each(data,function(key, registro) {
+                $("#Select").append('<option value='+registro.id+'>'+registro.nombre+'</option>');
+              });        
+            }
+                        })
+                });
+
+        */
+
+		
+		/*
+                  $('#calendar').fullCalendar({
+              header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+              },
+               defaultDate: '2018-03-23',
+                  locale: 'es',
+              navLinks: true, // can click day/week names to navigate views
+              editable: false,  //true
+                  firstDay: 1,
+                  lang: 'es',
+
+
+
+
+              selectable: true,
+
+
+
+              eventLimit: true, // allow "more" link when too many events
+
+
+                  eventClick: function(event) {
+                                        window.open(event.url, 'Info', 'width=200,height=30');
+                                        return false;
+                        },
+
+
+
+
+
+
+
+              events: [
+                {
+                  title: 'Disponible',
+                          url: '',
+                  start: '2018-03-23T07:00:00',
+                          end: '2018-03-23T08:00:00',
+                          color:'#4BA34B',
+                          textColor:'#fff'
+                },
+                          {
+                  title: 'Ocupado',
+                  start: '2018-03-23T08:00:00',
+                          end: '2018-03-23T09:00:00',
+                },
+                          {
+                  title: 'Disponible',
+                          url: '',
+                  start: '2018-03-23T09:00:00',
+                          end: '2018-03-23T10:00:00',
+                          color:'#4BA34B',
+                          textColor:'#fff'
+                },
+                         {
+                  title: 'Disponible',
+                          url: '',
+                  start: '2018-03-23T10:00:00',
+                          end: '2018-03-23T11:00:00',
+                          color:'#4BA34B',
+                          textColor:'#fff'
+                },
+                         {
+                  title: 'Disponible',
+                          url: '',
+                  start: '2018-03-23T11:00:00',
+                          end: '2018-03-23T12:00:00',
+                          color:'#4BA34B',
+                          textColor:'#fff'
+                },
+                         {
+                  title: 'Disponible',
+                          url: '',
+                  start: '2018-03-23T12:00:00',
+                          end: '2018-03-23T13:00:00',
+                          color:'#4BA34B',
+                          textColor:'#fff'
+                }
+              ]
+            });
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+        })
+
+
+
+
+ 
+
+   
+   
+         function DisableSpecificDates(date) {
+            var string = jQuery.datepicker.formatDate('yy-mm-dd', date);
+            return [arraydays.indexOf(string) == -1];
+          }
+
+
+         $(function() {
+          $(".datepicker").datepicker();
+        });
+		
+		
+		
+
+
+		$(function() {
+           $('.datepickersinfinsemana').datepicker({
+            beforeShowDay: $.datepicker.noWeekends,
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "2018:2030"
+          });
+        });
+		
+
+
+
+
+        $(function() {
+            $( ".datepickera" ).datepicker({
+              changeMonth: true,
+              changeYear: true,
+              yearRange: "1940:2030"
+            });
+          });
+
+        $(function() {
+            $( ".datepickerjo" ).datepicker({
+              changeMonth: true,
+              changeYear: true,
+              yearRange: "2012:<?php echo $anoactualcompleto; ?>"
+			   
+            });
+          });
+
+
+
+
+  $(function() {
+$(".datepickerexpensacur").datepicker({
+	maxDate: new Date(2020, 5, 20), 
+	minDate: new Date(2017, 12, 1)
+	});
+ });
+       
+		  
+		  
+		  
+   $(function() {
+            $( ".datepickercuraduria" ).datepicker({
+              changeMonth: true,
+              changeYear: true,
+              yearRange: "2016:<?php echo $anoactualcompleto; ?>"
+			   
+            });
+          });
+
+
+         $.datepicker.regional['es'] = {
+         closeText: 'Cerrar',
+         prevText: '<Ant',
+         nextText: 'Sig>',
+         currentText: 'Hoy',
+         monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+         monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+         dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+         dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
+         dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
+         weekHeader: 'Sm',
+         dateFormat: 'yy-mm-dd',
+         firstDay: 1,
+         isRTL: false,
+         showMonthAfterYear: false,
+         yearSuffix: '',
+         beforeShowDay: DisableSpecificDates
+         };
+         $.datepicker.setDefaults($.datepicker.regional['es']);
+
+
+
+
+
+
+		 
+        </script>
+
+
+
+
+
+
+        <script type="text/javascript" src="plugins/d3/d3.v3.js"></script>
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.css">
+
+
+		
+		
+		
+
+
+		
+		
+		
+		
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-120466003-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-120466003-1');
+</script>
+
+
+
+</body>
+</html>
+   
+ <?php 
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+	?>
+<script src='ip2.js'></script>
+<?php
+
+
+//https://norfipc.com/codigos/obtener-datos-asociados-direccion-ip-internet.php
+//https://www.ipify.org/
+$ipremota = file_get_contents('https://api.ipify.org');
+
+
+//setcookie("iplocal","iplocal");
+if (isset($_COOKIE['iplocal2'])) {
+	$ip_local2=$_COOKIE['iplocal2'];
+	//echo $ip_snr;
+} else {
+	$ip_local2='127.0.0.1';
+}
+
+
+
+	
+$campos = print_r($_POST, true);
+$url="http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+$user=$_SESSION['snr'];
+$insertSQL88 = sprintf("INSERT INTO auditoria (id_funcionario, alias, ip, fecha_hora, url, descripcion_auditoria, ip_local) VALUES (%s, %s, %s, now(), %s, %s, %s)",
+                       GetSQLValueString($user, "int"),
+                       GetSQLValueString($alias, "text"),
+					    GetSQLValueString($ipremota, "text"),
+                       GetSQLValueString($url, "text"),
+                       GetSQLValueString($campos, "text"),
+					   GetSQLValueString($ip_local2, "text"));
+$Result188 = mysql_query($insertSQL88, $conexion);
+
+mysql_free_result($Result188);
+
+}
+ 
+ 
+ 
+// envio automatico de mensajes...
+/*
+$masundia = date('Y-m-d', strtotime('+1 day', strtotime($realdate)));
+$selectyyc = mysql_query("select count(id_mensaje_correo) as tmens from mensaje_correo where fecha_mensaje BETWEEN '$realdate' AND '$masundia' and estado_mensaje_correo=1", $conexion);
+$rowyyc = mysql_fetch_assoc($selectyyc);
+if (0<$rowyyc['tmens']) {
+require_once('auto.php');
+} else {
+//require_once('auto.php');
+}
+ */
+ 
+ mysql_close($conexion);
+ 
+ } else { ?>
+ 
+ 
+<html>
+ 
+ <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Supernotariado</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link href='images/favicon.ico' rel='icon' type='image/x-icon'/>
+  </head>
+ 
+<body id="main">
+<div id="header1" class="x-hide-display">
+	<table style="width: 100%" border="0" cellpadding="0" cellspacing="0" >
+	<tr><td width="100%" align="center"> <image src="images/cabezotesnr-2020.jpg"> </td>
+	</table>
+</div>
+<div id="body1" class="x-hide-display">	
+<center>
+
+<table style="width:300px; border: 1px solid #dddddd; padding: 15px;">
+<tr><td>
+
+<div class="ca-login-titletext"> Iniciar sesión </div>
+<br/>
+<br/>
+<form NAME="Login" action="" METHOD="post" form="form">
+
+<div class="ca-login-text" > Nombre de usuario </div>
+<input type="text"  tabindex="1" size="30" autocomplete="off"  name="username">
+<div class="ca-login-forgottext"><a href="https://accesos.supernotariado.gov.co/iam/im/logout.jsp?envAlias=snr">¿Nombre del usuario olvidado?</a></div>
+<br/>
+<div class="ca-login-text" > Contraseña </div>
+<input type="password"  tabindex="2"  size="30" name="password" onKeyPress="return submitenter(this,event)">
+<div class="ca-login-forgottext"><a href="https://accesos.supernotariado.gov.co/iam/im/logout.jsp?envAlias=snr">¿Contraseña olvidada?</a></div>
+<br/>
+<br/>
+
+<INPUT TYPE="HIDDEN" NAME="SMENC" VALUE="UTF-8">
+<INPUT type="HIDDEN" name="SMLOCALE" value="ES-es">
+<input type="hidden"  name="query" value="skin=snr">
+<input type="hidden" name="target" value="http://www.vur.gov.co/portal/">
+<input type="hidden" name="smquerydata" value="">
+<input type="hidden" name="smauthreason" value="0">
+<input type="hidden" name="smagentname" value="idymJium+3XZdKHdwLSjGzYCrP4BuR/WyQX40WqW6HPUBYZVOqWKS8WmOHGkuPrn">
+<input type="hidden" name="postpreservationdata" value="">
+
+<table id="ext-comp-1019" cellspacing="0" class="x-btn x-btn-noicon" style="width: auto;"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="submit" id="ext-gen40" class=" x-btn-text" tabindex="3" onClick="submitForm();"> Iniciar sesión</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table>
+
+
+
+</form>
+</td></tr>
+</table>
+</center>
+
+</div>
+
+
+<div id="ext-comp-1024" class=" x-panel x-border-panel" style="left: 0px;  position: absolute; bottom: 0;  border-color:red; width: 100%;"><div class="x-panel-bwrap" id="ext-gen45"><div class="x-panel-body ca-footer-section x-panel-body-noheader" id="ext-gen46" style="padding: 5px; height: 38px; width: 100%;"><label id="ext-comp-1025"><div id="footer1" class="">
+<table width="100%" border="0" cellpadding="0" class="ca-footer-text">
+<tbody><tr><td nowrap="nowrap" class="ca-footer-copytext" align="center">Copyright &copy; 2019. Todos los derechos reservados.</td>
+</tr>
+<tr>
+<td nowrap="" align="center">
+<div class="ca-footer-linktext">
+<a href="http://www.supernotariado.gov.co" target="CA">Superintendencia de Notariado y Registro</a>
+</div>
+
+</td>
+</tr>
+</tbody>
+</table>
+</div></label></div></div></div>
+
+</body>
+
+<script type="text/javascript">
+// carga de pantalla
+// $(document).ajaxStart(function () {
+//   Pace.restart()
+// })
+</script>
+
+
+</html>
+
+<?php }
+
+} else { echo 'En Mantenimiento....';}  ?>

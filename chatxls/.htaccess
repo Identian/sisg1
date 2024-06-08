@@ -1,0 +1,7 @@
+RewriteEngine on
+RewriteCond %{SCRIPT_FILENAME} !-d  
+RewriteCond %{SCRIPT_FILENAME} !-f  
+RewriteRule ^$ index.php 
+RewriteRule ^([a-zA-Z0-9_-]+)\.xls$ index.php?q=$1 
+RewriteRule ^([a-zA-Z0-9_-]+)&([a-zA-Z0-9_-]+)\.xls$ index.php?q=$1&i=$2
+RewriteRule ^([a-zA-Z0-9_-]+)&([a-zA-Z0-9_-]+)&([a-zA-Z0-9_-]+)\.xls$ index.php?q=$1&i=$2&e=$3 

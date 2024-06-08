@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - PHP_ERROR_REPORTING=E_ALL
+      - PHP_DISPLAY_ERRORS=On

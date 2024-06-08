@@ -1,0 +1,275 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic);
+/*!
+ *   
+ *   Author: Jonathan Ardila
+ *	
+ * -------------------------
+ */
+/*------------------------------------------------------------------
+  [Forms]
+*/
+/*------------------------------------------------------------------
+  [Switch button]
+*/
+    .onoffswitch {
+        position: relative; width: 40px;
+        -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    }
+    .onoffswitch-checkbox {
+        display: none;
+    }
+    .onoffswitch-label {
+        display: block; overflow: hidden; cursor: pointer;
+        height: 20px; padding: 0; line-height: 20px;
+        border: 2px solid #E3E3E3; border-radius: 20px;
+        background-color: #FFFFFF;
+        transition: background-color 0.3s ease-in;
+    }
+    .onoffswitch-label:before {
+        content: "";
+        display: block; width: 20px; margin: 0px;
+        background: #FFFFFF;
+        position: absolute; top: 0; bottom: 0;
+        right: 18px;
+        border: 2px solid #E3E3E3; border-radius: 20px;
+        transition: all 0.3s ease-in 0s; 
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label {
+        background-color: #49E845;
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label, .onoffswitch-checkbox:checked + .onoffswitch-label:before {
+       border-color: #49E845;
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label:before {
+        right: 0px; 
+    }
+
+  .btclic {
+        position: relative; width: 40px;
+        -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    }
+    .btclic-checkbox {
+        display: none;
+    }
+    .btclic-label {
+        display: block; overflow: hidden; cursor: pointer;
+        height: 20px; padding: 0; line-height: 20px;
+        border: 2px solid #E3E3E3; border-radius: 20px;
+        background-color: #FFFFFF;
+        transition: background-color 0.3s ease-in;
+    }
+    .btclic-label:before {
+        content: "";
+        display: block; width: 20px; margin: 0px;
+        background: #FFFFFF;
+        position: absolute; top: 0; bottom: 0;
+        right: 18px;
+        border: 2px solid #E3E3E3; border-radius: 20px;
+        transition: all 0.3s ease-in 0s; 
+    }
+    .btclic-checkbox:checked + .btclic-label {
+        background-color: #49E845;
+    }
+    .btclic-checkbox:checked + .btclic-label, .btclic-checkbox:checked + .btclic-label:before {
+       border-color: #49E845;
+    }
+    .btclic-checkbox:checked + .btclic-label:before {
+        right: 0px; 
+    }
+
+.res_expensa{
+  float: right;
+  margin-right: 20px;
+}
+
+.titulos_expensa{
+  background: #eee; padding: 10px 0px; text-align: center; font-size: 90%;
+}
+.titulos_expensa_egresos{
+  background: #eee; color:#B40404; text-align: center; padding: 10px 0px; border: solid 1px #eee;
+}
+.titulonotaria{
+  font-size: 12px; padding: 10px 0px; text-align: center;
+}
+.titulototalnotaria{
+  font-size: 12px; padding: 10px 0px; text-align: right;
+}
+/*ESTILOS DE LAS DATATABLES*/
+.table {
+  font-size: 85%;
+  font-family: Arial;
+  text-align: left;
+  width: 100%;
+}  
+
+th {
+ text-align: left;
+}
+
+/*ESTILOS DE LAS DATATABLES*/
+.info {
+  font-size: 85%;
+  font-family: Arial;
+}   
+
+/*ESTILOS DE LAS DATATABLES*/
+.infover {
+  font-size: 100%;
+  font-family: Arial;
+  width: 80%;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight:bold; 
+}   
+
+.divinfo{
+  
+}
+
+.inputexpensa{
+  width: 98%; 
+  height:20px;
+  margin: 5px 5px 10px 5px;
+}
+.inputexpensan{
+  width: 90%; 
+  height:20px;
+  margin: 5px;
+}
+.inspanexp{
+  color: red;
+}
+.titleactu{
+  font-size: 100%;
+  margin-left: 10%;
+}
+
+.title_not{
+  font-size: 12px;
+  margin-left: 10%;
+}
+
+
+.cruz{
+color:#000; 
+font-size: 50px;
+padding: 0px;
+margin: 0px;
+}
+
+/*ARREGLO TABLAS DE NOTARIADO*/
+.jona  {border-collapse:collapse;border-spacing:0;width: 100%;}
+.jona td{font-family:Arial, sans-serif;font-size:80%; text-transform: capitalize; padding:5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#eee;}
+.jona th{font-family:Arial, sans-serif;font-size:80%;font-weight:normal;padding:5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;}
+.jona .jona-1wig{font-weight:bold;text-align:left;vertical-align:top}
+.jona .jona-baqh{text-align:center;vertical-align:top}
+.jona .jona-0lax{text-align:right;vertical-align:top;} /*derecha*/
+.jona .jona-1lax{text-align:left;vertical-align:top}/*izquierda*/
+
+
+.radius{
+  border: solid 1px #00a65a;
+  padding: 0px 10px 10px 10px;
+-webkit-border-bottom-right-radius: 5px;
+-webkit-border-bottom-left-radius: 5px;
+-moz-border-radius-bottomright: 5px;
+-moz-border-radius-bottomleft: 5px;
+border-bottom-right-radius: 5px;
+border-bottom-left-radius: 5px;
+}
+
+
+.tituloradius{
+border: solid 1px #00a65a;
+background: #00a65a;
+padding:5px;
+color:white;
+-webkit-border-top-left-radius: 5px;
+-webkit-border-top-right-radius: 5px;
+-moz-border-radius-topleft: 5px;
+-moz-border-radius-topright: 5px;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+}
+
+
+
+
+
+
+/* ESTILO DEL MODULO NC NOMINA CONTRATISTAS*/
+.titulosContratista {
+    background-color: #B40404;
+    color:white;
+    padding:15px;
+    margin-bottom: 10px;
+    text-align:center;
+  }
+  .subtitulos{
+    padding:20px;
+    text-align:left;
+    color:#B40404;
+    font-size:13px;
+  }
+  .datepickera{
+    width:100% !important;
+  }
+  .col-form-label{
+    text-align: right;
+    text-transform: capitalize !important;
+    margin-top:5px !important;
+  }
+  .col-form-div{
+    margin-top:5px !important;
+  }
+  .grupos{
+    padding: 0px; margin: 0px;
+  }
+  .obligatorio{
+    color:red;
+    font-size:16px;
+  }
+  .menuContratos{
+    background: white;
+    /*border: solid 1px red;*/
+    height: 52px;
+    margin-bottom: 10px;
+  }
+  .btn_activo{
+    border: solid 1px green;
+    color:green;
+    padding:2px 5px;
+  }
+  .btn_anulado{
+    border: solid 1px red;
+    color:red;
+    padding:2px 5px;
+  }
+  .btn_suspendido{
+    border: solid 1px orange;
+    color:orange;
+    padding:2px 5px;
+  }
+  .btn_terminado{
+    border: solid 1px red;
+    color:red;
+    padding:2px 5px;
+  }
+  .btn_sinactivar{
+    border: solid 1px red;
+    color:red;
+    padding:2px 5px;
+  }
+  .nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+    border-top-color: #ccc !important;
+  }
+  .nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+      color: #fff;
+      background-color: #c1c1c1 !important;
+  }
+  .titulosEditaContrato{
+    background:#ccc;
+    padding:8px;
+  }
+  
+  
